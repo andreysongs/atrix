@@ -1,0 +1,42 @@
+{
+  "name": "pulse-performance-os",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "preview": "node scripts/serve-static.mjs",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "assets:generate": "capacitor-assets generate --iconBackgroundColor '#06080d' --iconBackgroundColorDark '#06080d' --splashBackgroundColor '#06080d' --splashBackgroundColorDark '#06080d' --logoSplashScale 0.2",
+    "mobile:sync": "npm run build && cap sync",
+    "mobile:android": "npm run mobile:sync && cap open android",
+    "mobile:ios": "npm run mobile:sync && cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/ios": "^7.4.3",
+    "@tanstack/react-query": "^5.90.21",
+    "framer-motion": "^12.23.26",
+    "lucide-react": "^0.468.0",
+    "next": "^15.5.9",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "recharts": "^3.6.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^7.4.3",
+    "@types/node": "^22.19.7",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19.2.3",
+    "eslint": "^9.39.2",
+    "eslint-config-next": "^15.5.9",
+    "typescript": "^5.9.3"
+  },
+  "overrides": {
+    "postcss": "8.5.10"
+  }
+}
