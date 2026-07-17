@@ -1,5 +1,5 @@
 import { Body, Controller, Get, NotFoundException, Param, Patch, Post, Query } from "@nestjs/common";
-import { CreateExerciseDto, CreateGoalDto, CreateSessionDto, CreateWorkoutDto, UpdateProfileDto } from "./contracts.js";
+import { CreateExerciseDto, CreateGoalDto, CreateSessionDto, CreateWorkoutDto, RegisterDeviceDto, UpdateProfileDto } from "./contracts.js";
 import { DatabaseService } from "./database.service.js";
 
 @Controller("api/v1")
@@ -8,6 +8,14 @@ export class AppController {
 
   @Get("health")
   health() { return { status: "ok", service: "pulse-api", version: "1.0.0", timestamp: new Date().toISOString() }; }
+
+  @Get("app-config")
+  appConfig() {
+    return { minimumVersion: "0.1.0", latestVersion: "0.1.0", maintenance: false, features: { pushNotifications: true, offlineSync: true } };
+  }
+
+  @Post("devices") registerDevice(@Body() body: RegisterDeviceDto) { return this.database.registerDevice(body); }
+  @Post("devices/unregister") unregisterDevice(@Body("token") token: string) { return this.database.unregisterDevice(token); }
 
   @Get("dashboard")
   dashboard() {

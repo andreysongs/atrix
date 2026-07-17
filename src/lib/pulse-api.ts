@@ -35,6 +35,16 @@ export async function saveWorkoutSession(session: ApiSessionInput) {
   return response.json() as Promise<Record<string, unknown>>;
 }
 
+export async function registerPushDevice(input: { token: string; platform: "android" | "ios" | "web"; appVersion?: string; locale?: string }) {
+  const response = await fetch(apiBaseUrl() + "/devices", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) throw new Error("API returned " + response.status);
+  return response.json() as Promise<Record<string, unknown>>;
+}
+
 export function queueWorkoutSession(session: ApiSessionInput) {
   if (typeof window === "undefined") return;
   const current = JSON.parse(window.localStorage.getItem(pendingKey) || "[]") as ApiSessionInput[];

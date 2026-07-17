@@ -12,6 +12,8 @@ npm run dev
 
 Base URL local: `http://localhost:4000/api/v1`.
 
+`GET /app-config` fornece configuracao remota e `POST /devices` registra tokens push Android/iOS. O envio real exige credenciais Firebase Admin/APNs proprias; segredos vinculados a APKs de terceiros nao devem ser reutilizados.
+
 Principais recursos: `health`, `dashboard`, `profile`, `exercises`, `workouts`, `sessions` e `goals`. As mutações persistem atomicamente em `data/pulse-db.json`.
 
 Para outro dispositivo na rede, use o IP do computador, por exemplo `http://10.0.0.133:4000/api/v1`.

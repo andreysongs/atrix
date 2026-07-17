@@ -9,6 +9,7 @@ export type PulseDatabase = {
   workouts: Array<Record<string, unknown>>;
   sessions: Array<Record<string, unknown>>;
   goals: Array<Record<string, unknown>>;
+  devices: Array<Record<string, unknown>>;
 };
 
 const seed: PulseDatabase = {
@@ -26,7 +27,8 @@ const seed: PulseDatabase = {
   sessions: [],
   goals: [
     { id: "weekly-5", title: "Treinar 5x na semana", category: "consistency", current: 3, target: 5, unit: "treinos", deadline: "2026-07-19" }
-  ]
+  ],
+  devices: []
 };
 
 @Injectable()
@@ -36,7 +38,8 @@ export class DatabaseService implements OnModuleInit {
 
   async onModuleInit() {
     try {
-      this.data = JSON.parse(await readFile(this.filePath, "utf8")) as PulseDatabase;
+      const stored = JSON.parse(await readFile(this.filePath, "utf8")) as Partial<PulseDatabase>;
+      this.data = { ...structuredClone(seed), ...stored, devices: stored.devices ?? [] };
     } catch {
       await this.persist();
     }
@@ -48,6 +51,27 @@ export class DatabaseService implements OnModuleInit {
   workouts() { return structuredClone(this.data.workouts); }
   sessions() { return structuredClone(this.data.sessions); }
   goals() { return structuredClone(this.data.goals); }
+  devices() { return structuredClone(this.data.devices); }
+
+  async registerDevice(input: { token: string; platform: string; appVersion?: string; locale?: string }) {
+    const existing = this.data.devices.find((item) => item.token === input.token);
+    if (existing) {
+      Object.assign(existing, input, { updatedAt: new Date().toISOString(), active: true });
+      await this.persist();
+      return structuredClone(existing);
+    }
+    const record = { id: randomUUID(), ...input, active: true, createdAt: new Date().toISOString() };
+    this.data.devices.push(record);
+    await this.persist();
+    return structuredClone(record);
+  }
+
+  async unregisterDevice(token: string) {
+    const existing = this.data.devices.find((item) => item.token === token);
+    if (existing) Object.assign(existing, { active: false, updatedAt: new Date().toISOString() });
+    await this.persist();
+    return { success: true };
+  }
 
   async updateProfile<T extends object>(input: T) {
     this.data.profile = { ...this.data.profile, ...input, updatedAt: new Date().toISOString() };

@@ -1,6 +1,13 @@
 import { IsArray, IsIn, IsInt, IsNumber, IsOptional, IsPositive, IsString, Max, Min, ValidateNested } from "class-validator";
 import { Type } from "class-transformer";
 
+export class RegisterDeviceDto {
+  @IsString() token!: string;
+  @IsIn(["android", "ios", "web"]) platform!: string;
+  @IsOptional() @IsString() appVersion?: string;
+  @IsOptional() @IsString() locale?: string;
+}
+
 export class UpdateProfileDto {
   @IsOptional() @IsString() name?: string;
   @IsOptional() @IsNumber() @Min(30) @Max(300) weightKg?: number;

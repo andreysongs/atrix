@@ -75,6 +75,7 @@ import {
   type WorkoutExercise,
 } from "@/lib/demo-data";
 import { flushWorkoutSessionQueue, queueWorkoutSession, saveWorkoutSession, type ApiSessionInput } from "@/lib/pulse-api";
+import { initializePushNotifications } from "@/lib/push-notifications";
 
 type ViewId = "dashboard" | "workouts" | "library" | "progress" | "calendar" | "coach";
 
@@ -992,6 +993,7 @@ export function PerformanceApp() {
     window.addEventListener("beforeinstallprompt", captureInstall);
     if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => undefined);
     void flushWorkoutSessionQueue();
+    void initializePushNotifications();
     return () => {
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
