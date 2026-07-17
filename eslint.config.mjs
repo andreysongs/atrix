@@ -16,6 +16,8 @@ const config = [
       ".edge-*/**",
       "android/**",
       "ios/**",
+      "api/dist/**",
+      "api/data/**",
     ],
   },
   ...compat.extends("next/core-web-vitals", "next/typescript"),

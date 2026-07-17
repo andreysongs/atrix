@@ -36,7 +36,6 @@ import {
   Search,
   Send,
   Settings,
-  SlidersHorizontal,
   Sparkles,
   Smartphone,
   Timer,
