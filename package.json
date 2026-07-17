@@ -12,7 +12,10 @@
     "assets:generate": "capacitor-assets generate --iconBackgroundColor '#06080d' --iconBackgroundColorDark '#06080d' --splashBackgroundColor '#06080d' --splashBackgroundColorDark '#06080d' --logoSplashScale 0.2",
     "mobile:sync": "npm run build && cap sync",
     "mobile:android": "npm run mobile:sync && cap open android",
-    "mobile:ios": "npm run mobile:sync && cap open ios"
+    "mobile:ios": "npm run mobile:sync && cap open ios",
+    "api:install": "npm --prefix api install",
+    "api:dev": "npm --prefix api run dev",
+    "api:build": "npm --prefix api run build"
   },
   "dependencies": {
     "@capacitor/android": "^7.4.3",

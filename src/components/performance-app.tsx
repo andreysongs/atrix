@@ -74,6 +74,7 @@ import {
   type Workout,
   type WorkoutExercise,
 } from "@/lib/demo-data";
+import { flushWorkoutSessionQueue, queueWorkoutSession, saveWorkoutSession, type ApiSessionInput } from "@/lib/pulse-api";
 
 type ViewId = "dashboard" | "workouts" | "library" | "progress" | "calendar" | "coach";
 
@@ -990,6 +991,7 @@ export function PerformanceApp() {
     window.addEventListener("offline", goOffline);
     window.addEventListener("beforeinstallprompt", captureInstall);
     if (process.env.NODE_ENV === "production" && "serviceWorker" in navigator) navigator.serviceWorker.register("/sw.js").catch(() => undefined);
+    void flushWorkoutSessionQueue();
     return () => {
       window.removeEventListener("online", goOnline);
       window.removeEventListener("offline", goOffline);
@@ -1071,6 +1073,20 @@ export function PerformanceApp() {
       volumeKg: Math.round(volume),
       xp,
     };
+    const apiSession: ApiSessionInput = {
+      localId: record.id,
+      workoutId: record.workoutId,
+      startedAt: new Date(record.startedAt).toISOString(),
+      finishedAt: new Date(record.finishedAt).toISOString(),
+      durationSeconds: record.durationSeconds,
+      sets: record.completedSetIds.flatMap((setId) => {
+        const exercise = currentWorkout.exercises.find((item) => setId.startsWith(item.id + "-"));
+        const value = record.values[setId];
+        if (!exercise || !value) return [];
+        return [{ exerciseId: exercise.id, setNumber: Number(setId.slice(exercise.id.length + 1)) + 1, loadKg: value.load, reps: value.reps, rpe: value.rpe }];
+      }),
+    };
+    void saveWorkoutSession(apiSession).catch(() => queueWorkoutSession(apiSession));
     setHistory((current) => [record, ...current]);
     setSummary({ name: record.name, duration: record.durationSeconds, volume: record.volumeKg, sets: record.completedSetIds.length, xp: record.xp });
     setActiveSession(null);

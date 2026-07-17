@@ -45,6 +45,17 @@ A arquitetura de produção prevista usa NestJS, Prisma e PostgreSQL como um mon
 
 ## Executar localmente
 
+### API REST
+
+O backend NestJS fica em `api/` e substitui a dependência Firebase/Appy Pie observada no APK de referência.
+
+```bash
+npm run api:install
+npm run api:dev
+```
+
+O frontend usa `http://<host>:4000/api/v1` por padrão e mantém sessões pendentes no dispositivo quando a API está offline. Para Android/iOS fora da rede local, defina `NEXT_PUBLIC_PULSE_API_URL` com a URL pública da API.
+
 ### Pré-requisitos
 
 - Node.js 20 ou superior
