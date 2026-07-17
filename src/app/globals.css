@@ -2222,6 +2222,12 @@ input {
   font-size: 10.5px;
 }
 
+.offline-filter.active {
+  border-color: rgba(72, 223, 255, .55);
+  color: #48dfff;
+  background: rgba(72, 223, 255, .08);
+}
+
 .library-results-row strong {
   color: #d6dce7;
 }

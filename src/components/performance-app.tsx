@@ -76,6 +76,7 @@ import {
 } from "@/lib/demo-data";
 import { flushWorkoutSessionQueue, queueWorkoutSession, saveWorkoutSession, type ApiSessionInput } from "@/lib/pulse-api";
 import { initializePushNotifications } from "@/lib/push-notifications";
+import { listOfflineGuides, removeOfflineGuide, saveOfflineGuide } from "@/lib/offline-content";
 
 type ViewId = "dashboard" | "workouts" | "library" | "progress" | "calendar" | "coach";
 
@@ -563,11 +564,24 @@ function LibraryView() {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("Todos");
   const [selected, setSelected] = useState<(typeof exerciseLibrary)[number] | null>(null);
+  const [offlineIds, setOfflineIds] = useState<string[]>([]);
+  const [offlineOnly, setOfflineOnly] = useState(false);
   const categories = ["Todos", "Peito", "Costas", "Pernas", "Ombros"];
+  useEffect(() => { void listOfflineGuides().then((items) => setOfflineIds(items.map((item) => item.id))).catch(() => undefined); }, []);
   const filtered = exerciseLibrary.filter((exercise) => {
     const matchesQuery = exercise.name.toLowerCase().includes(query.toLowerCase());
-    return matchesQuery && (filter === "Todos" || exercise.category === filter);
+    return matchesQuery && (filter === "Todos" || exercise.category === filter) && (!offlineOnly || offlineIds.includes(exercise.id));
   });
+  const toggleOffline = async () => {
+    if (!selected) return;
+    if (offlineIds.includes(selected.id)) {
+      await removeOfflineGuide(selected.id);
+      setOfflineIds((current) => current.filter((id) => id !== selected.id));
+      return;
+    }
+    await saveOfflineGuide({ ...selected, steps: ["Prepare a posicao e estabilize o core.", "Execute a fase excentrica com controle.", "Finalize mantendo alinhamento e tensao."], savedAt: new Date().toISOString() });
+    setOfflineIds((current) => [...current, selected.id]);
+  };
   return (
     <div className="view-stack">
       <PageIntro view="library" />
@@ -576,7 +590,7 @@ function LibraryView() {
         <div className="filter-pills" role="group" aria-label="Filtrar por grupo muscular">
           {categories.map((category) => <button key={category} className={filter === category ? "active" : ""} onClick={() => setFilter(category)}>{category}</button>)}
         </div>
-        <button className="icon-button filter-button" aria-label="Mais filtros"><SlidersHorizontal size={18} /></button>
+        <button className={"secondary-button offline-filter " + (offlineOnly ? "active" : "")} onClick={() => setOfflineOnly((value) => !value)}><Download size={16} /> Offline ({offlineIds.length})</button>
       </div>
       <div className="library-results-row"><p><strong>{filtered.length}</strong> exercícios encontrados</p><button className="text-button">Mais usados <ChevronRight size={15} /></button></div>
       {filtered.length > 0 ? (
@@ -619,6 +633,7 @@ function LibraryView() {
               <h3>Execução</h3>
               <ol className="execution-steps"><li>Prepare a posição e estabilize o core antes de iniciar.</li><li>Execute a fase excêntrica com controle e amplitude segura.</li><li>Finalize mantendo alinhamento e tensão no músculo-alvo.</li></ol>
               <div className="warning-note"><Gauge size={18} /><span><strong>Evite compensações</strong><small>Interrompa a série se perder a amplitude ou a postura.</small></span></div>
+              <button className="secondary-button full-button" onClick={() => void toggleOffline()}>{offlineIds.includes(selected.id) ? <><Check size={17} /> Disponível offline</> : <><Download size={17} /> Baixar guia offline</>}</button>
               <button className="primary-button full-button"><Plus size={17} /> Adicionar ao treino</button>
             </motion.aside>
           </motion.div>
