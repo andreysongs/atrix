@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
@@ -610,7 +611,8 @@ function LibraryView() {
               transition={{ delay: index * 0.035 }}
             >
               <div className={"exercise-visual accent-" + exercise.accent}>
-                <span className="muscle-figure" aria-hidden="true"><i /><i /><i /><i /></span>
+                <Image src={exercise.image} alt={`Ilustração de ${exercise.name}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 25vw" />
+                <span className="exercise-image-shade" aria-hidden="true" />
                 <span className="favorite">{exercise.favorite ? "★" : "☆"}</span>
                 <span className="level-pill">{exercise.level}</span>
               </div>
@@ -631,7 +633,7 @@ function LibraryView() {
           <motion.div className="drawer-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={() => setSelected(null)}>
             <motion.aside className="detail-drawer" role="dialog" aria-modal="true" aria-label={"Detalhes de " + selected.name} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 28, stiffness: 280 }} onMouseDown={(event) => event.stopPropagation()}>
               <button className="icon-button drawer-close" onClick={() => setSelected(null)} aria-label="Fechar detalhes"><X size={19} /></button>
-              <div className={"detail-hero accent-" + selected.accent}><span className="muscle-figure large-figure"><i /><i /><i /><i /></span></div>
+              <div className={"detail-hero accent-" + selected.accent}><Image src={selected.image} alt={`Execução ilustrada de ${selected.name}`} fill sizes="(max-width: 640px) 100vw, 500px" /><span className="exercise-image-shade" aria-hidden="true" /></div>
               <p className="eyebrow">{selected.category} · {selected.equipment}</p><h2>{selected.name}</h2><p className="drawer-description">Movimento composto acompanhado pelo Pulse para técnica, progressão e volume.</p>
               <div className="drawer-stat-grid"><div><span>Músculo principal</span><strong>{selected.primary}</strong></div><div><span>Secundários</span><strong>{selected.secondary}</strong></div><div><span>Nível</span><strong>{selected.level}</strong></div><div><span>Seu recorde</span><strong>{selected.best}</strong></div></div>
               <h3>Execução</h3>
@@ -866,10 +868,12 @@ function WorkoutSession({
         <div className="session-exercises">
           {workout.exercises.map((exercise, exerciseIndex) => {
             const completedForExercise = Array.from({ length: exercise.sets }, (_, index) => session.completed.includes([exercise.id, index].join("-"))).filter(Boolean).length;
+            const exerciseVisual = exerciseLibrary.find((item) => item.id === exercise.id);
             return (
               <article className="session-exercise card" key={exercise.id}>
                 <div className="session-exercise-head">
                   <span className="exercise-order">{String(exerciseIndex + 1).padStart(2, "0")}</span>
+                  {exerciseVisual && <span className="session-exercise-thumb"><Image src={exerciseVisual.image} alt="" fill sizes="68px" /></span>}
                   <div><h2>{exercise.name}</h2><p>{exercise.muscle} · {exercise.note || "Controle total da amplitude"}</p></div>
                   <div className="exercise-complete"><strong>{completedForExercise}/{exercise.sets}</strong><small>séries</small></div>
                 </div>

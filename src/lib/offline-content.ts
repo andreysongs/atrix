@@ -1,6 +1,7 @@
 export type OfflineExerciseGuide = {
   id: string; name: string; category: string; equipment: string;
   primary: string; secondary: string; level: string;
+  image: string;
   steps: string[]; savedAt: string;
 };
 

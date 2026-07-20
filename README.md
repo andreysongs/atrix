@@ -164,3 +164,7 @@ Para adicionar vídeos próprios ou licenciados:
 4. execute `npm run build` e `npm run mobile:sync`.
 
 Arquivos MP4 próprios são suportados diretamente pelo player e pelo cache solicitado pelo usuário. HLS/DASH, legendas, DRM e Chromecast exigem uma camada de mídia e um receiver próprios antes de serem habilitados em produção.
+
+### Ilustrações dos exercícios
+
+Os oito exercícios da biblioteca possuem imagens educacionais originais em `public/media/exercises/`. Elas foram geradas especificamente para o Pulse, otimizadas em WebP e integradas aos cards, ao painel de detalhes e ao modo de treino. As imagens também fazem parte do precache offline da PWA.

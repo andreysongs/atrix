@@ -87,14 +87,14 @@ export const workouts: Workout[] = [
 ];
 
 export const exerciseLibrary = [
-  { id: "bench", name: "Supino reto com barra", category: "Peito", equipment: "Barra", level: "Intermediário", favorite: true, accent: "violet", primary: "Peitoral maior", secondary: "Tríceps · Deltoide anterior", best: "92,5 kg" },
-  { id: "incline", name: "Supino inclinado com halteres", category: "Peito", equipment: "Halteres", level: "Intermediário", favorite: true, accent: "violet", primary: "Peitoral superior", secondary: "Tríceps · Deltoide anterior", best: "32 kg" },
-  { id: "squat", name: "Agachamento livre", category: "Pernas", equipment: "Barra", level: "Avançado", favorite: true, accent: "cyan", primary: "Quadríceps · Glúteos", secondary: "Core · Adutores", best: "120 kg" },
-  { id: "rdl", name: "Levantamento terra romeno", category: "Pernas", equipment: "Barra", level: "Intermediário", favorite: true, accent: "cyan", primary: "Posteriores · Glúteos", secondary: "Eretores · Antebraços", best: "105 kg" },
-  { id: "pullup", name: "Barra fixa pronada", category: "Costas", equipment: "Peso corporal", level: "Intermediário", favorite: true, accent: "blue", primary: "Latíssimo do dorso", secondary: "Bíceps · Core", best: "12 reps" },
-  { id: "row", name: "Remada curvada com barra", category: "Costas", equipment: "Barra", level: "Intermediário", favorite: false, accent: "blue", primary: "Dorsais · Romboides", secondary: "Bíceps · Core", best: "82,5 kg" },
-  { id: "military", name: "Desenvolvimento militar", category: "Ombros", equipment: "Barra", level: "Intermediário", favorite: false, accent: "orange", primary: "Deltoides", secondary: "Tríceps · Core", best: "57,5 kg" },
-  { id: "lateral", name: "Elevação lateral no cabo", category: "Ombros", equipment: "Polia", level: "Iniciante", favorite: false, accent: "orange", primary: "Deltoide lateral", secondary: "Trapézio superior", best: "14 kg" },
+  { id: "bench", name: "Supino reto com barra", category: "Peito", equipment: "Barra", level: "Intermediário", favorite: true, accent: "violet", primary: "Peitoral maior", secondary: "Tríceps · Deltoide anterior", best: "92,5 kg", image: "/media/exercises/bench-press.webp" },
+  { id: "incline", name: "Supino inclinado com halteres", category: "Peito", equipment: "Halteres", level: "Intermediário", favorite: true, accent: "violet", primary: "Peitoral superior", secondary: "Tríceps · Deltoide anterior", best: "32 kg", image: "/media/exercises/incline-dumbbell-press.webp" },
+  { id: "squat", name: "Agachamento livre", category: "Pernas", equipment: "Barra", level: "Avançado", favorite: true, accent: "cyan", primary: "Quadríceps · Glúteos", secondary: "Core · Adutores", best: "120 kg", image: "/media/exercises/barbell-squat.webp" },
+  { id: "rdl", name: "Levantamento terra romeno", category: "Pernas", equipment: "Barra", level: "Intermediário", favorite: true, accent: "cyan", primary: "Posteriores · Glúteos", secondary: "Eretores · Antebraços", best: "105 kg", image: "/media/exercises/romanian-deadlift.webp" },
+  { id: "pullup", name: "Barra fixa pronada", category: "Costas", equipment: "Peso corporal", level: "Intermediário", favorite: true, accent: "blue", primary: "Latíssimo do dorso", secondary: "Bíceps · Core", best: "12 reps", image: "/media/exercises/pull-up.webp" },
+  { id: "row", name: "Remada curvada com barra", category: "Costas", equipment: "Barra", level: "Intermediário", favorite: false, accent: "blue", primary: "Dorsais · Romboides", secondary: "Bíceps · Core", best: "82,5 kg", image: "/media/exercises/barbell-row.webp" },
+  { id: "military", name: "Desenvolvimento militar", category: "Ombros", equipment: "Barra", level: "Intermediário", favorite: false, accent: "orange", primary: "Deltoides", secondary: "Tríceps · Core", best: "57,5 kg", image: "/media/exercises/military-press.webp" },
+  { id: "lateral", name: "Elevação lateral no cabo", category: "Ombros", equipment: "Polia", level: "Iniciante", favorite: false, accent: "orange", primary: "Deltoide lateral", secondary: "Trapézio superior", best: "14 kg", image: "/media/exercises/cable-lateral-raise.webp" },
 ];
 
 export const metrics = [
