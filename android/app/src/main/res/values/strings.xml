@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">Pulse</string>
-    <string name="title_activity_main">Pulse</string>
+    <string name="app_name">FORGE</string>
+    <string name="title_activity_main">FORGE</string>
     <string name="package_name">com.pulse.performance</string>
     <string name="custom_url_scheme">com.pulse.performance</string>
 </resources>

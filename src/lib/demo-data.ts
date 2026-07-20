@@ -23,9 +23,9 @@ export type Workout = {
 };
 
 export const profile = {
-  firstName: "Rafael",
-  fullName: "Rafael Mendes",
-  initials: "RM",
+  firstName: "Andrey",
+  fullName: "Andrey Mendes",
+  initials: "AM",
   level: 18,
   xp: 7420,
   nextLevelXp: 8000,
@@ -91,10 +91,21 @@ export const exerciseLibrary = [
   { id: "incline", name: "Supino inclinado com halteres", category: "Peito", equipment: "Halteres", level: "Intermediário", favorite: true, accent: "violet", primary: "Peitoral superior", secondary: "Tríceps · Deltoide anterior", best: "32 kg", image: "/media/exercises/incline-dumbbell-press.webp" },
   { id: "squat", name: "Agachamento livre", category: "Pernas", equipment: "Barra", level: "Avançado", favorite: true, accent: "cyan", primary: "Quadríceps · Glúteos", secondary: "Core · Adutores", best: "120 kg", image: "/media/exercises/barbell-squat.webp" },
   { id: "rdl", name: "Levantamento terra romeno", category: "Pernas", equipment: "Barra", level: "Intermediário", favorite: true, accent: "cyan", primary: "Posteriores · Glúteos", secondary: "Eretores · Antebraços", best: "105 kg", image: "/media/exercises/romanian-deadlift.webp" },
+  { id: "leg-press", name: "Leg press 45°", category: "Pernas", equipment: "Máquina", level: "Iniciante", favorite: false, accent: "cyan", primary: "Quadríceps · Glúteos", secondary: "Posteriores · Adutores", best: "180 kg", image: "/media/exercises/leg-press.webp" },
+  { id: "leg-curl", name: "Mesa flexora", category: "Pernas", equipment: "Máquina", level: "Iniciante", favorite: false, accent: "cyan", primary: "Posteriores de coxa", secondary: "Gastrocnêmio", best: "52 kg", image: "/media/exercises/lying-leg-curl.webp" },
   { id: "pullup", name: "Barra fixa pronada", category: "Costas", equipment: "Peso corporal", level: "Intermediário", favorite: true, accent: "blue", primary: "Latíssimo do dorso", secondary: "Bíceps · Core", best: "12 reps", image: "/media/exercises/pull-up.webp" },
   { id: "row", name: "Remada curvada com barra", category: "Costas", equipment: "Barra", level: "Intermediário", favorite: false, accent: "blue", primary: "Dorsais · Romboides", secondary: "Bíceps · Core", best: "82,5 kg", image: "/media/exercises/barbell-row.webp" },
+  { id: "pulldown", name: "Puxada alta neutra", category: "Costas", equipment: "Polia", level: "Iniciante", favorite: false, accent: "blue", primary: "Latíssimo do dorso", secondary: "Bíceps · Romboides", best: "65 kg", image: "/media/exercises/neutral-grip-pulldown.webp" },
+  { id: "facepull", name: "Face pull", category: "Ombros", equipment: "Polia", level: "Iniciante", favorite: false, accent: "orange", primary: "Deltoide posterior", secondary: "Romboides · Manguito rotador", best: "25 kg", image: "/media/exercises/face-pull.webp" },
   { id: "military", name: "Desenvolvimento militar", category: "Ombros", equipment: "Barra", level: "Intermediário", favorite: false, accent: "orange", primary: "Deltoides", secondary: "Tríceps · Core", best: "57,5 kg", image: "/media/exercises/military-press.webp" },
   { id: "lateral", name: "Elevação lateral no cabo", category: "Ombros", equipment: "Polia", level: "Iniciante", favorite: false, accent: "orange", primary: "Deltoide lateral", secondary: "Trapézio superior", best: "14 kg", image: "/media/exercises/cable-lateral-raise.webp" },
+  { id: "muscle-up", name: "Muscle-up na barra", category: "Calistenia", equipment: "Barra fixa", level: "Avançado", favorite: false, accent: "green", primary: "Dorsais · Peitoral", secondary: "Bíceps · Tríceps · Core", best: "Em evolução", image: "/media/exercises/muscle-up.webp" },
+  { id: "front-lever", name: "Front lever", category: "Calistenia", equipment: "Barra fixa", level: "Avançado", favorite: false, accent: "green", primary: "Dorsais · Core", secondary: "Ombros · Glúteos", best: "Em evolução", image: "/media/exercises/front-lever.webp" },
+  { id: "back-lever", name: "Back lever", category: "Calistenia", equipment: "Barra fixa", level: "Avançado", favorite: false, accent: "green", primary: "Ombros · Peitoral", secondary: "Dorsais · Core", best: "Em evolução", image: "/media/exercises/back-lever.webp" },
+  { id: "planche", name: "Planche", category: "Calistenia", equipment: "Paralelas", level: "Avançado", favorite: false, accent: "green", primary: "Ombros · Peitoral", secondary: "Tríceps · Core", best: "Em evolução", image: "/media/exercises/planche.webp" },
+  { id: "human-flag", name: "Bandeira humana", category: "Calistenia", equipment: "Barra vertical", level: "Avançado", favorite: false, accent: "green", primary: "Oblíquos · Dorsais", secondary: "Ombros · Antebraços", best: "Em evolução", image: "/media/exercises/human-flag.webp" },
+  { id: "l-sit", name: "L-sit nas paralelas", category: "Calistenia", equipment: "Paralelas", level: "Intermediário", favorite: false, accent: "green", primary: "Core · Flexores do quadril", secondary: "Tríceps · Quadríceps", best: "Em evolução", image: "/media/exercises/l-sit.webp" },
+  { id: "handstand", name: "Parada de mãos", category: "Calistenia", equipment: "Peso corporal", level: "Avançado", favorite: false, accent: "green", primary: "Ombros · Core", secondary: "Tríceps · Punhos", best: "Em evolução", image: "/media/exercises/handstand.webp" },
 ];
 
 export const metrics = [

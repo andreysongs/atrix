@@ -1,5 +1,6 @@
 import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
+import { networkInterfaces } from "node:os";
 import { extname, resolve, sep } from "node:path";
 
 const root = resolve("out");
@@ -9,7 +10,9 @@ const types = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
   ".svg": "image/svg+xml",
+  ".webp": "image/webp",
   ".webmanifest": "application/manifest+json; charset=utf-8",
 };
 
@@ -39,6 +42,8 @@ createServer(async (request, response) => {
       response.writeHead(404).end("Not found");
     }
   }
-}).listen(port, "127.0.0.1", () => {
-  process.stdout.write("Pulse preview: http://127.0.0.1:" + port + "\n");
+}).listen(port, "0.0.0.0", () => {
+  process.stdout.write("FORGE preview: http://localhost:" + port + "\n");
+  const localAddress = Object.values(networkInterfaces()).flat().find((address) => address?.family === "IPv4" && !address.internal)?.address;
+  if (localAddress) process.stdout.write("Rede local: http://" + localAddress + ":" + port + "\n");
 });

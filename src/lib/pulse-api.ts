@@ -18,7 +18,8 @@ export type ApiSessionInput = {
 const pendingKey = "pulse-api-pending-sessions";
 
 export function apiBaseUrl() {
-  if (process.env.NEXT_PUBLIC_PULSE_API_URL) return process.env.NEXT_PUBLIC_PULSE_API_URL.replace(/\/$/, "");
+  const configuredUrl = process.env.NEXT_PUBLIC_FORGE_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL;
+  if (configuredUrl) return configuredUrl.replace(/\/$/, "");
   if (typeof window !== "undefined" && /^https?:$/.test(window.location.protocol)) {
     return window.location.protocol + "//" + window.location.hostname + ":4000/api/v1";
   }

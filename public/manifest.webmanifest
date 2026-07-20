@@ -1,6 +1,6 @@
 {
-  "name": "Pulse — Performance OS",
-  "short_name": "Pulse",
+  "name": "FORGE — Build Your Best",
+  "short_name": "FORGE",
   "description": "Treinos, recuperação e evolução em uma experiência fitness premium.",
   "lang": "pt-BR",
   "dir": "ltr",
@@ -14,8 +14,8 @@
     "minimal-ui"
   ],
   "orientation": "any",
-  "background_color": "#06080d",
-  "theme_color": "#06080d",
+  "background_color": "#F8FAFC",
+  "theme_color": "#2563EB",
   "categories": [
     "fitness",
     "health",
@@ -70,7 +70,7 @@
     {
       "name": "Iniciar treino",
       "short_name": "Treinar",
-      "description": "Abra o Pulse pronto para começar um treino.",
+      "description": "Abra o FORGE pronto para começar um treino.",
       "url": "/?action=start-workout",
       "icons": [
         {

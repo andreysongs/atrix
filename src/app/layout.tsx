@@ -1,15 +1,16 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import "./forge-theme.css";
 
 export const metadata: Metadata = {
-  title: "Pulse — Performance OS",
+  title: "FORGE — Build Your Best",
   description: "Treinos, recuperação e evolução em uma única experiência.",
-  applicationName: "Pulse",
+  applicationName: "FORGE",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "black-translucent",
-    title: "Pulse",
+    statusBarStyle: "default",
+    title: "FORGE",
   },
   icons: {
     icon: "/icon.svg",
@@ -22,8 +23,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
-  themeColor: "#06080d",
-  colorScheme: "dark",
+  themeColor: "#f8fafc",
+  colorScheme: "light dark",
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

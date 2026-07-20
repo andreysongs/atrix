@@ -1,38 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
-  <title id="title">Pulse</title>
-  <desc id="description">Símbolo de pulso em azul, violeta e ciano sobre fundo escuro.</desc>
+  <title id="title">FORGE</title>
+  <desc id="description">Símbolo FORGE em azul e verde-lima para treino e evolução.</desc>
   <defs>
-    <linearGradient id="background" x1="58" y1="35" x2="446" y2="472" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#141c2d"/>
-      <stop offset="0.55" stop-color="#0a0e17"/>
-      <stop offset="1" stop-color="#06080d"/>
+    <linearGradient id="forge-blue" x1="64" y1="38" x2="448" y2="478" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3B82F6"/>
+      <stop offset=".54" stop-color="#2563EB"/>
+      <stop offset="1" stop-color="#1E3A8A"/>
     </linearGradient>
-    <linearGradient id="ring" x1="116" y1="122" x2="410" y2="397" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#5b7cfa"/>
-      <stop offset="0.54" stop-color="#9d72ff"/>
-      <stop offset="1" stop-color="#43d9ff"/>
+    <linearGradient id="forge-energy" x1="182" y1="127" x2="374" y2="382" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D9F99D"/>
+      <stop offset="1" stop-color="#84CC16"/>
     </linearGradient>
-    <linearGradient id="pulse" x1="128" y1="190" x2="389" y2="330" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#7191ff"/>
-      <stop offset="0.5" stop-color="#a77cff"/>
-      <stop offset="1" stop-color="#43d9ff"/>
-    </linearGradient>
-    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="10" result="blur"/>
-      <feComposite in="blur" in2="SourceGraphic" operator="out" result="halo"/>
-      <feColorMatrix in="halo" values="0 0 0 0 0.263 0 0 0 0 0.851 0 0 0 0 1 0 0 0 .42 0"/>
-      <feMerge>
-        <feMergeNode/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
+    <filter id="shadow" x="-25%" y="-25%" width="150%" height="150%">
+      <feDropShadow dx="0" dy="13" stdDeviation="11" flood-color="#172554" flood-opacity=".28"/>
     </filter>
   </defs>
-  <rect width="512" height="512" rx="116" fill="url(#background)"/>
-  <rect x="1" y="1" width="510" height="510" rx="115" fill="none" stroke="#fff" stroke-opacity=".08" stroke-width="2"/>
-  <circle cx="256" cy="256" r="157" fill="#0d131d" fill-opacity=".9" stroke="#fff" stroke-opacity=".07" stroke-width="2"/>
-  <circle cx="256" cy="256" r="145" fill="none" stroke="url(#ring)" stroke-width="13" stroke-linecap="round" stroke-dasharray="650 265" transform="rotate(-42 256 256)" opacity=".92"/>
-  <path d="M130 274h64l31-83 54 157 35-94h68" fill="none" stroke="url(#pulse)" stroke-width="25" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)"/>
-  <circle cx="382" cy="274" r="12.5" fill="#43d9ff"/>
-  <circle cx="382" cy="274" r="22" fill="#43d9ff" opacity=".13"/>
+  <rect width="512" height="512" rx="124" fill="url(#forge-blue)"/>
+  <rect x="14" y="14" width="484" height="484" rx="110" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>
+  <g filter="url(#shadow)">
+    <path d="M154 120h224v63H229v60h125v59H229v91h-75V120Z" fill="#fff"/>
+    <path d="m319 112 91 140-99 148-38-49 61-99-58-91 43-49Z" fill="url(#forge-energy)"/>
+  </g>
+  <circle cx="380" cy="126" r="13" fill="#D9F99D"/>
 </svg>
-

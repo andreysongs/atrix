@@ -4,6 +4,8 @@
 /.tools/
 /.git-pulse/
 /.edge-*/
+/icons/
+/tmp/
 /screenshots/
 *.tsbuildinfo
 .DS_Store

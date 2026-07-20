@@ -1,8 +1,8 @@
-const CACHE_VERSION = "v2";
-const SHELL_CACHE = `pulse-shell-${CACHE_VERSION}`;
-const ASSET_CACHE = `pulse-assets-${CACHE_VERSION}`;
-const MEDIA_CACHE = "pulse-guided-media-v1";
-const PULSE_CACHES = new Set([SHELL_CACHE, ASSET_CACHE, MEDIA_CACHE]);
+const CACHE_VERSION = "v5";
+const SHELL_CACHE = `forge-shell-${CACHE_VERSION}`;
+const ASSET_CACHE = `forge-assets-${CACHE_VERSION}`;
+const MEDIA_CACHE = "forge-guided-media-v1";
+const FORGE_CACHES = new Set([SHELL_CACHE, ASSET_CACHE, MEDIA_CACHE]);
 const OFFLINE_FALLBACK = "/";
 const PRECACHE_URLS = [
   OFFLINE_FALLBACK,
@@ -15,22 +15,28 @@ const PRECACHE_URLS = [
   "/media/exercises/incline-dumbbell-press.webp",
   "/media/exercises/barbell-squat.webp",
   "/media/exercises/romanian-deadlift.webp",
+  "/media/exercises/leg-press.webp",
+  "/media/exercises/lying-leg-curl.webp",
   "/media/exercises/pull-up.webp",
   "/media/exercises/barbell-row.webp",
+  "/media/exercises/neutral-grip-pulldown.webp",
+  "/media/exercises/face-pull.webp",
   "/media/exercises/military-press.webp",
   "/media/exercises/cable-lateral-raise.webp",
+  "/media/exercises/muscle-up.webp",
+  "/media/exercises/front-lever.webp",
+  "/media/exercises/back-lever.webp",
+  "/media/exercises/planche.webp",
+  "/media/exercises/human-flag.webp",
+  "/media/exercises/l-sit.webp",
+  "/media/exercises/handstand.webp",
   "/icons/icon-192.webp",
   "/icons/icon-512.webp",
 ];
 const MAX_ASSET_ENTRIES = 80;
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches
-      .open(SHELL_CACHE)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
-      .then(() => self.skipWaiting()),
-  );
+  event.waitUntil(cacheShellAndBuildAssets().then(() => self.skipWaiting()));
 });
 
 self.addEventListener("activate", (event) => {
@@ -39,7 +45,7 @@ self.addEventListener("activate", (event) => {
       caches.keys().then((cacheNames) =>
         Promise.all(
           cacheNames
-            .filter((name) => name.startsWith("pulse-") && !PULSE_CACHES.has(name))
+            .filter((name) => (name.startsWith("pulse-") || name.startsWith("forge-")) && !FORGE_CACHES.has(name))
             .map((name) => caches.delete(name)),
         ),
       ),
@@ -101,7 +107,7 @@ async function networkFirstNavigation(request) {
 
     return (
       fallback ||
-      new Response("Pulse está offline. Reconecte-se e tente novamente.", {
+      new Response("FORGE está offline. Reconecte-se e tente novamente.", {
         status: 503,
         headers: { "Content-Type": "text/plain; charset=utf-8" },
       })
@@ -111,7 +117,7 @@ async function networkFirstNavigation(request) {
 
 async function cacheFirstAsset(request) {
   const cache = await caches.open(ASSET_CACHE);
-  const cachedResponse = await cache.match(request);
+  const cachedResponse = await cache.match(request) || await (await caches.open(SHELL_CACHE)).match(request);
   if (cachedResponse) return cachedResponse;
 
   const networkResponse = await fetch(request);
@@ -121,6 +127,28 @@ async function cacheFirstAsset(request) {
   }
 
   return networkResponse;
+}
+
+async function cacheShellAndBuildAssets() {
+  const shellCache = await caches.open(SHELL_CACHE);
+  await shellCache.addAll(PRECACHE_URLS);
+
+  const document = await shellCache.match(OFFLINE_FALLBACK, { ignoreSearch: true });
+  if (!document) return;
+
+  const html = await document.text();
+  const buildAssets = Array.from(html.matchAll(/(?:src|href)="([^"]+)"/g), (match) => match[1])
+    .map((asset) => new URL(asset, self.location.origin))
+    .filter((asset) => asset.origin === self.location.origin && asset.pathname.startsWith("/_next/static/"));
+  const assetCache = await caches.open(ASSET_CACHE);
+  await Promise.all(buildAssets.map(async (asset) => {
+    try {
+      const response = await fetch(asset);
+      if (isCacheableResponse(response)) await assetCache.put(asset, response);
+    } catch {
+      // The static shell remains available even if one optional chunk cannot be prefetched.
+    }
+  }));
 }
 
 function isCacheableResponse(response) {
