@@ -1,7 +1,8 @@
-const CACHE_VERSION = "v1";
+const CACHE_VERSION = "v2";
 const SHELL_CACHE = `pulse-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `pulse-assets-${CACHE_VERSION}`;
-const PULSE_CACHES = new Set([SHELL_CACHE, ASSET_CACHE]);
+const MEDIA_CACHE = "pulse-guided-media-v1";
+const PULSE_CACHES = new Set([SHELL_CACHE, ASSET_CACHE, MEDIA_CACHE]);
 const OFFLINE_FALLBACK = "/";
 const PRECACHE_URLS = [
   OFFLINE_FALLBACK,
@@ -9,6 +10,7 @@ const PRECACHE_URLS = [
   "/icon.svg",
   "/maskable-icon.svg",
   "/apple-touch-icon.png",
+  "/media/pulse-training-hero.webp",
   "/icons/icon-192.webp",
   "/icons/icon-512.webp",
 ];

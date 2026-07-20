@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   ChevronRight,
   CircleCheck,
+  Clapperboard,
   Clock3,
   Download,
   Droplets,
@@ -76,8 +77,9 @@ import {
 import { flushWorkoutSessionQueue, queueWorkoutSession, saveWorkoutSession, type ApiSessionInput } from "@/lib/pulse-api";
 import { initializePushNotifications } from "@/lib/push-notifications";
 import { listOfflineGuides, removeOfflineGuide, saveOfflineGuide } from "@/lib/offline-content";
+import { ProgramsView, PulseEditorialHero } from "@/components/training-media";
 
-type ViewId = "dashboard" | "workouts" | "library" | "progress" | "calendar" | "coach";
+type ViewId = "dashboard" | "programs" | "workouts" | "library" | "progress" | "calendar" | "coach";
 
 type SetValue = {
   load: number;
@@ -130,6 +132,7 @@ interface BeforeInstallPromptEvent extends Event {
 
 const navItems: { id: ViewId; label: string; description: string; icon: typeof Home }[] = [
   { id: "dashboard", label: "Visão geral", description: "Seu dia", icon: Home },
+  { id: "programs", label: "Descobrir", description: "Programas guiados", icon: Clapperboard },
   { id: "workouts", label: "Treinos", description: "Rotinas e planos", icon: Dumbbell },
   { id: "library", label: "Exercícios", description: "Biblioteca", icon: BookOpen },
   { id: "progress", label: "Progresso", description: "Métricas e recordes", icon: ChartNoAxesCombined },
@@ -139,6 +142,7 @@ const navItems: { id: ViewId; label: string; description: string; icon: typeof H
 
 const viewTitles: Record<ViewId, { eyebrow: string; title: string; subtitle: string }> = {
   dashboard: { eyebrow: "QUINTA-FEIRA, 16 DE JULHO", title: "Bom dia, Rafael", subtitle: "Seu corpo está pronto para evoluir." },
+  programs: { eyebrow: "PULSE TRAINING", title: "Descobrir", subtitle: "Programas e sessões guiadas para cada objetivo." },
   workouts: { eyebrow: "PROJETO HÍBRIDO · SEMANA 6", title: "Seus treinos", subtitle: "Estrutura inteligente para cada objetivo." },
   library: { eyebrow: "BIBLIOTECA", title: "Explore exercícios", subtitle: "Técnica, músculos e alternativas em um só lugar." },
   progress: { eyebrow: "ANÁLISE DE PERFORMANCE", title: "Seu progresso", subtitle: "Cada repetição conta uma parte da sua história." },
@@ -318,7 +322,8 @@ function DashboardView({
     : metric);
   return (
     <div className="view-stack">
-      <PageIntro view="dashboard" />
+      <div className="dashboard-editorial-head"><PageIntro view="dashboard" /><button className="editorial-text-link" onClick={() => navigate("programs")}>Explorar treinos <ArrowRight size={16} /></button></div>
+      <PulseEditorialHero workout={today} onStart={() => onStart(today)} onExplore={() => navigate("programs")} />
 
       <section className="dashboard-grid hero-grid" aria-label="Resumo de hoje">
         <motion.article
@@ -1174,6 +1179,7 @@ export function PerformanceApp() {
           <AnimatePresence mode="wait">
             <motion.div key={view} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.16 }}>
               {view === "dashboard" && <DashboardView onStart={startWorkout} navigate={navigate} history={history} />}
+              {view === "programs" && <ProgramsView onStart={startWorkout} toast={setToastMessage} />}
               {view === "workouts" && <WorkoutsView onStart={startWorkout} toast={setToastMessage} />}
               {view === "library" && <LibraryView />}
               {view === "progress" && <ProgressView history={history} />}
@@ -1186,7 +1192,7 @@ export function PerformanceApp() {
 
       <nav className="mobile-bottom-nav" aria-label="Navegação móvel">
         <button className={view === "dashboard" ? "active" : ""} onClick={() => navigate("dashboard")}><Home size={19} /><span>Hoje</span></button>
-        <button className={view === "workouts" ? "active" : ""} onClick={() => navigate("workouts")}><Dumbbell size={19} /><span>Treinos</span></button>
+        <button className={view === "programs" ? "active" : ""} onClick={() => navigate("programs")}><Clapperboard size={19} /><span>Descobrir</span></button>
         <button className="train-fab" onClick={() => activeSession ? setSessionVisible(true) : startWorkout(workouts[0])}><span>{activeSession ? <Timer size={23} /> : <Play size={23} fill="currentColor" />}</span><small>{activeSession ? "Retomar" : "Treinar"}</small></button>
         <button className={view === "progress" ? "active" : ""} onClick={() => navigate("progress")}><ChartNoAxesCombined size={19} /><span>Progresso</span></button>
         <button className={view === "coach" ? "active" : ""} onClick={() => navigate("coach")}><Sparkles size={19} /><span>Coach</span></button>

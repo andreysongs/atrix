@@ -149,3 +149,18 @@ Tokens de sessão ou integrações nunca devem ser gravados em `localStorage`. N
 7. Evoluir para modos Coach/Aluno, consentimento granular e gamificação.
 
 O detalhamento das fronteiras, entidades, fluxos e controles está em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+
+## Programas guiados e mídia
+
+A tela **Descobrir** oferece programas, sessões guiadas, intervalos, modo de registro e cache offline. O pôster em `public/media/pulse-training-hero.webp` é um ativo original do Pulse.
+
+O APK usado como referência não contém os vídeos de treino: eles são entregues por serviços remotos protegidos e não fazem parte do arquivo instalável. Por isso, nenhum vídeo, token, URL privada, logotipo ou mídia da Nike é distribuído neste projeto.
+
+Para adicionar vídeos próprios ou licenciados:
+
+1. coloque o arquivo MP4 (H.264 + AAC) em `public/media/guided/`;
+2. preencha `videoSrc` na sessão correspondente em `src/lib/guided-content.ts`;
+3. mantenha `poster`, duração e direitos de uso documentados;
+4. execute `npm run build` e `npm run mobile:sync`.
+
+Arquivos MP4 próprios são suportados diretamente pelo player e pelo cache solicitado pelo usuário. HLS/DASH, legendas, DRM e Chromecast exigem uma camada de mídia e um receiver próprios antes de serem habilitados em produção.
