@@ -43,7 +43,7 @@ createServer(async (request, response) => {
     }
   }
 }).listen(port, "0.0.0.0", () => {
-  process.stdout.write("FORGE preview: http://localhost:" + port + "\n");
+  process.stdout.write("OLYMPUS AI preview: http://localhost:" + port + "\n");
   const localAddress = Object.values(networkInterfaces()).flat().find((address) => address?.family === "IPv4" && !address.internal)?.address;
   if (localAddress) process.stdout.write("Rede local: http://" + localAddress + ":" + port + "\n");
 });

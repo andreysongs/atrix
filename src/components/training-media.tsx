@@ -129,20 +129,20 @@ export function ProgramsView({ onStart, toast }: { onStart: (workout: Workout) =
   const [downloads, setDownloads] = useState<string[]>([]);
 
   useEffect(() => {
-    try { setDownloads(JSON.parse(localStorage.getItem("forge-guided-downloads") || localStorage.getItem("pulse-guided-downloads") || "[]") as string[]); } catch { setDownloads([]); }
+    try { setDownloads(JSON.parse(localStorage.getItem("olympus-guided-downloads") || localStorage.getItem("forge-guided-downloads") || localStorage.getItem("pulse-guided-downloads") || "[]") as string[]); } catch { setDownloads([]); }
   }, []);
 
   const toggleDownload = async (session: GuidedSession) => {
     const exists = downloads.includes(session.id);
     const next = exists ? downloads.filter((id) => id !== session.id) : [...downloads, session.id];
     setDownloads(next);
-    localStorage.setItem("forge-guided-downloads", JSON.stringify(next));
+    localStorage.setItem("olympus-guided-downloads", JSON.stringify(next));
     if (!exists && "caches" in window) {
-      const cache = await caches.open("forge-guided-media-v1");
+      const cache = await caches.open("olympus-guided-media-v1");
       await cache.add(session.poster).catch(() => undefined);
       if (session.videoSrc) await cache.add(session.videoSrc).catch(() => undefined);
     } else if (exists && "caches" in window) {
-      const cache = await caches.open("forge-guided-media-v1");
+      const cache = await caches.open("olympus-guided-media-v1");
       await cache.delete(session.poster);
       if (session.videoSrc) await cache.delete(session.videoSrc);
     }
@@ -159,7 +159,7 @@ export function ProgramsView({ onStart, toast }: { onStart: (workout: Workout) =
       <section className="programs-masthead">
         <Image src="/media/pulse-training-hero.webp" alt="Atleta em sessão de força" fill priority sizes="(max-width: 720px) 100vw, 80vw" />
         <span className="programs-masthead-shade" />
-        <div><span className="editorial-kicker"><i /> FORGE TRAINING</span><h1>Movimento que<br />muda você.</h1><p>Programas progressivos, sessões guiadas e técnica para cada fase da sua evolução.</p><button onClick={() => setPlayingSession(guidedSessions[0])}><Play size={17} fill="currentColor" /> Assistir treino</button></div>
+        <div><span className="editorial-kicker"><i /> OLYMPUS TRAINING</span><h1>Movimento que<br />muda você.</h1><p>Programas progressivos, sessões guiadas e técnica para cada fase da sua evolução.</p><button onClick={() => setPlayingSession(guidedSessions[0])}><Play size={17} fill="currentColor" /> Assistir treino</button></div>
       </section>
 
       <section className="editorial-section">

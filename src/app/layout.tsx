@@ -3,17 +3,17 @@ import "./globals.css";
 import "./forge-theme.css";
 
 export const metadata: Metadata = {
-  title: "FORGE — Build Your Best",
-  description: "Treinos, recuperação e evolução em uma única experiência.",
-  applicationName: "FORGE",
+  title: "OLYMPUS AI — Treine com inteligência",
+  description: "Treine com inteligência. Evolua sem limites.",
+  applicationName: "OLYMPUS AI",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "FORGE",
+    title: "OLYMPUS AI",
   },
   icons: {
-    icon: "/icon.svg",
+    icon: "/icons/icon-192.webp",
     apple: "/apple-touch-icon.png",
   },
 };
@@ -23,7 +23,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   viewportFit: "cover",
-  themeColor: "#f8fafc",
+  themeColor: "#030303",
   colorScheme: "light dark",
 };
 

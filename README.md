@@ -1,4 +1,4 @@
-# FORGE — Build Your Best
+# OLYMPUS AI — Treine com inteligência. Evolua sem limites.
 
 Demo web premium de um sistema unificado para planejamento, execução e análise de treinos. O recorte atual prioriza uma jornada de musculação completa e demonstrável, com dados coerentes de corrida, mobilidade e bem-estar para comunicar a visão futura do produto.
 
@@ -7,7 +7,7 @@ Demo web premium de um sistema unificado para planejamento, execução e anális
 ## O que a demo entrega
 
 - Dashboard responsivo com treino do dia, prontidão, metas, sequência, métricas e atividades recentes.
-- Templates de treino e biblioteca de exercícios com dados demonstrativos.
+- Templates de treino e catálogo com 212 exercícios, fotografias individuais, técnica, segurança e progressões.
 - Modo de treino focado para registrar séries, repetições, carga, RPE e descanso.
 - Progresso com volume, peso, percentual de gordura e recordes pessoais.
 - Calendário mensal com treinos realizados, planejados e recuperação.
@@ -56,7 +56,7 @@ npm run api:install
 npm run api:dev
 ```
 
-O frontend usa `http://<host>:4000/api/v1` por padrão e mantém sessões pendentes no dispositivo quando a API está offline. Para Android/iOS, defina `NEXT_PUBLIC_FORGE_API_URL` com a URL HTTPS pública da API antes do build; `NEXT_PUBLIC_PULSE_API_URL` permanece como alias de compatibilidade.
+O frontend usa `http://<host>:4000/api/v1` por padrão e mantém sessões pendentes no dispositivo quando a API está offline. Para Android/iOS, defina `NEXT_PUBLIC_OLYMPUS_API_URL` com a URL HTTPS pública da API antes do build; `NEXT_PUBLIC_FORGE_API_URL` e `NEXT_PUBLIC_PULSE_API_URL` permanecem como aliases de compatibilidade.
 
 ### Pré-requisitos
 
@@ -95,7 +95,7 @@ O build usa `output: "export"` e gera o artefato estático em `out/`. Por isso, 
 
 ## PWA
 
-A aplicação web é responsiva e instalável como PWA. O service worker armazena o app shell, os chunks iniciais do build, ícones, mídia pública e as ilustrações da biblioteca; os dados de sessão permanecem no dispositivo quando a API está indisponível. Não existe ainda sincronização offline confiável com servidor.
+A aplicação web é responsiva e instalável como PWA. O service worker armazena o app shell, os chunks iniciais do build, ícones e mídia essencial. As fotografias dos exercícios são cacheadas durante a navegação ou quando o usuário salva um guia offline; os dados de sessão permanecem no dispositivo quando a API está indisponível.
 
 Antes de chamar uma entrega de PWA pronta para produção, devem ser validados no build final:
 
@@ -134,7 +134,7 @@ npm run mobile:ios
 
 O build iOS requer macOS, Xcode e as ferramentas nativas da Apple. Um computador Windows pode desenvolver e validar a aplicação web, mas não compilar, assinar nem publicar o aplicativo iOS.
 
-Os diretórios `android/` e `ios/` já incluem os assets FORGE gerados a partir de `assets/logo.svg`. Para regenerá-los após uma mudança de marca, execute `npm run assets:generate` e confira o manifesto PWA antes de publicar. Os ícones PWA podem ser recriados com `npm run assets:forge`. Plugins de sensores, notificações, deep links e armazenamento seguro deverão ficar atrás de adapters para manter o domínio independente do Capacitor.
+Os diretórios `android/` e `ios/` incluem os assets OLYMPUS AI gerados a partir do emblema oficial. Para recriar o lockup, ícones PWA e splash, execute `npm run assets:olympus`; para os derivados nativos, execute `npm run assets:generate` e confira o manifesto antes de publicar. Plugins de sensores, notificações, deep links e armazenamento seguro deverão ficar atrás de adapters para manter o domínio independente do Capacitor.
 
 ## Dados e privacidade
 
@@ -156,7 +156,7 @@ O detalhamento das fronteiras, entidades, fluxos e controles está em [docs/ARCH
 
 ## Programas guiados e mídia
 
-A tela **Explorar** oferece programas, sessões guiadas, intervalos, modo de registro e cache offline. O pôster em `public/media/pulse-training-hero.webp` é um ativo original do FORGE.
+A tela **Explorar** oferece programas, sessões guiadas, intervalos, modo de registro e cache offline. O pôster em `public/media/pulse-training-hero.webp` é um ativo original do projeto OLYMPUS AI.
 
 O APK usado como referência não contém os vídeos de treino: eles são entregues por serviços remotos protegidos e não fazem parte do arquivo instalável. Por isso, nenhum vídeo, token, URL privada, logotipo ou mídia da Nike é distribuído neste projeto.
 
@@ -169,6 +169,8 @@ Para adicionar vídeos próprios ou licenciados:
 
 Arquivos MP4 próprios são suportados diretamente pelo player e pelo cache solicitado pelo usuário. HLS/DASH, legendas, DRM e Chromecast exigem uma camada de mídia e um receiver próprios antes de serem habilitados em produção.
 
-### Ilustrações dos exercícios
+### Fotografias dos exercícios
 
-Os 19 exercícios da biblioteca possuem imagens educacionais originais em `public/media/exercises/`. Elas foram geradas especificamente para o FORGE, otimizadas em WebP e integradas aos cards, ao painel de detalhes e ao modo de treino. As imagens também fazem parte do precache offline da PWA. A coleção cobre todos os movimentos usados nas rotinas atuais e todos os movimentos de calistenia nomeados explicitamente no documento de expansão: pull-up, muscle-up, front lever, back lever, planche, bandeira humana, L-sit e parada de mãos.
+Cada um dos 212 exercícios possui uma capa individual em WebP dentro de `public/media/exercises/olympus/`. As 19 fotografias originais aprovadas foram preservadas e o restante foi produzido no mesmo padrão editorial: atleta realista, academia escura, equipamento visível e luz dourada discreta. Os ativos estão integrados aos cards, ao painel de detalhes, ao modo de treino e aos guias offline.
+
+`npm run assets:exercises` valida a cobertura dos 212 arquivos e, quando as folhas-fonte estão disponíveis em `tmp/olympus-photo-sheets/`, refaz os recortes em 1280 × 720. Nenhuma mídia da Nike ou de outro aplicativo é distribuída no catálogo.

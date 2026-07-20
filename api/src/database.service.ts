@@ -37,10 +37,13 @@ export class DatabaseService implements OnModuleInit {
   private data: PulseDatabase = structuredClone(seed);
 
   async onModuleInit() {
+    const catalogExercises = await this.loadSharedExerciseCatalog();
     try {
       const stored = JSON.parse(await readFile(this.filePath, "utf8")) as Partial<PulseDatabase>;
       this.data = { ...structuredClone(seed), ...stored, devices: stored.devices ?? [] };
+      this.data.exercises = this.mergeExercises(catalogExercises, stored.exercises ?? []);
     } catch {
+      this.data.exercises = catalogExercises;
       await this.persist();
     }
   }
@@ -87,6 +90,34 @@ export class DatabaseService implements OnModuleInit {
   }
 
   workout(id: string) { return structuredClone(this.data.workouts.find((item) => item.id === id)); }
+
+  private async loadSharedExerciseCatalog() {
+    const candidates = [
+      join(process.cwd(), "..", "src", "data", "exercise-seeds.json"),
+      join(process.cwd(), "src", "data", "exercise-seeds.json"),
+    ];
+    for (const candidate of candidates) {
+      try {
+        const parsed = JSON.parse(await readFile(candidate, "utf8")) as { exercises?: Array<Record<string, unknown>> };
+        if (Array.isArray(parsed.exercises) && parsed.exercises.length > 0) {
+          return parsed.exercises.map((exercise) => ({
+            ...exercise,
+            primaryMuscle: exercise.primary,
+            secondaryMuscles: String(exercise.secondary || "").split("·").map((item) => item.trim()).filter(Boolean),
+            image: `/media/exercises/olympus/${String(exercise.id)}.webp`,
+          }));
+        }
+      } catch {
+        // Standalone API deployments may not include the shared web catalog.
+      }
+    }
+    return structuredClone(seed.exercises);
+  }
+
+  private mergeExercises(catalog: Array<Record<string, unknown>>, stored: Array<Record<string, unknown>>) {
+    const catalogIds = new Set(catalog.map((exercise) => String(exercise.id)));
+    return [...catalog, ...stored.filter((exercise) => !catalogIds.has(String(exercise.id)))];
+  }
 
   private async persist() {
     await mkdir(dirname(this.filePath), { recursive: true });

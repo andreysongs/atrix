@@ -147,7 +147,7 @@ const navItems: { id: ViewId; label: string; description: string; icon: typeof H
   { id: "programs", label: "Explorar", description: "Programas guiados", icon: Clapperboard },
   { id: "library", label: "Exercícios", description: "Catálogo completo", icon: BookOpen },
   { id: "progress", label: "Progresso", description: "Métricas e recordes", icon: ChartNoAxesCombined },
-  { id: "coach", label: "FORGE AI", description: "Treinador inteligente", icon: Sparkles },
+  { id: "coach", label: "OLYMPUS AI", description: "Treinador inteligente", icon: Sparkles },
   { id: "running", label: "Corrida", description: "Pace e distância", icon: Footprints },
   { id: "mobility", label: "Yoga & mobilidade", description: "Recuperação", icon: HeartPulse },
   { id: "calendar", label: "Calendário", description: "Planejamento", icon: CalendarDays },
@@ -157,16 +157,16 @@ const navItems: { id: ViewId; label: string; description: string; icon: typeof H
 
 const viewTitles: Record<ViewId, { eyebrow: string; title: string; subtitle: string }> = {
   dashboard: { eyebrow: "SEGUNDA-FEIRA, 20 DE JULHO", title: "Boa tarde, Andrey", subtitle: "Você treinou 4 vezes esta semana. Continue construindo." },
-  programs: { eyebrow: "FORGE TRAINING", title: "Explorar", subtitle: "Programas e sessões guiadas para cada objetivo." },
+  programs: { eyebrow: "OLYMPUS TRAINING", title: "Explorar", subtitle: "Programas e sessões guiadas para cada objetivo." },
   workouts: { eyebrow: "PROJETO HÍBRIDO · SEMANA 6", title: "Seus treinos", subtitle: "Estrutura inteligente para cada objetivo." },
   library: { eyebrow: "BIBLIOTECA", title: "Explore exercícios", subtitle: "Técnica, músculos e alternativas em um só lugar." },
   progress: { eyebrow: "ANÁLISE DE PERFORMANCE", title: "Seu progresso", subtitle: "Cada repetição conta uma parte da sua história." },
   calendar: { eyebrow: "PLANEJAMENTO", title: "Calendário", subtitle: "Consistência começa com uma semana bem planejada." },
-  coach: { eyebrow: "FORGE INTELLIGENCE", title: "FORGE AI", subtitle: "Decisões melhores com base no seu histórico." },
+  coach: { eyebrow: "OLYMPUS INTELLIGENCE", title: "OLYMPUS AI", subtitle: "Decisões melhores com base no seu histórico." },
   profile: { eyebrow: "SUA CONTA", title: "Perfil", subtitle: "Preferências, conquistas e segurança." },
-  running: { eyebrow: "FORGE RUN", title: "Corrida", subtitle: "Distância, pace e zonas cardíacas." },
+  running: { eyebrow: "OLYMPUS RUN", title: "Corrida", subtitle: "Distância, pace e zonas cardíacas." },
   mobility: { eyebrow: "RECUPERAÇÃO", title: "Yoga & mobilidade", subtitle: "Mova-se melhor para evoluir sempre." },
-  trainer: { eyebrow: "FORGE PRO", title: "Personal trainer", subtitle: "Alunos, treinos e evolução em um só painel." },
+  trainer: { eyebrow: "OLYMPUS PRO", title: "Personal trainer", subtitle: "Alunos, treinos e evolução em um só painel." },
 };
 
 const iconForMetric = {
@@ -259,15 +259,13 @@ function ProgressBar({ value, tone = "violet", label }: { value: number; tone?: 
 
 function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
-    <div className={"brand " + (compact ? "brand-compact" : "")} aria-label="FORGE">
+    <div className={"brand " + (compact ? "brand-compact" : "")} aria-label="OLYMPUS AI">
       <span className="brand-mark" aria-hidden="true">
-        <span />
-        <span />
-        <span />
+        <Image src="/branding/olympus-app-icon.png" alt="" width={42} height={42} priority />
       </span>
       {!compact && (
         <span className="brand-word">
-          FORGE <small>BUILD YOUR BEST</small>
+          OLYMPUS <small>AI · TREINE COM INTELIGÊNCIA</small>
         </span>
       )}
     </div>
@@ -330,26 +328,80 @@ function PageIntro({ view, athleteName }: { view: ViewId; athleteName?: string }
 
 type LibraryExercise = (typeof exerciseLibrary)[number];
 
+type DetailTabId = "technique" | "safety" | "progress";
+
+const exerciseCategoryOrder = [
+  "Peito", "Costas", "Ombros", "Trapézio", "Bíceps", "Tríceps", "Antebraços", "Antebraço",
+  "Core", "Abdômen", "Oblíquos", "Lombar", "Pernas", "Quadríceps", "Posteriores", "Posterior",
+  "Glúteos", "Panturrilhas", "Panturrilha", "Adutores e abdutores", "Pescoço", "Calistenia",
+  "Mobilidade", "Alongamento", "Yoga", "Pilates", "Funcional", "HIIT", "Cross Training",
+  "Corrida", "Caminhada", "Reabilitação",
+];
+
+const EXERCISES_PER_PAGE = 24;
+
+function toExerciseTextList(value: unknown): string[] {
+  if (typeof value === "string") return value.trim() ? [value.trim()] : [];
+  if (Array.isArray(value)) return value.map((item) => String(item).trim()).filter(Boolean);
+  if (!value || typeof value !== "object") return [];
+  const labels: Record<string, string> = { strength: "Força", hypertrophy: "Hipertrofia", endurance: "Resistência" };
+  return Object.entries(value).map(([key, entry]) => {
+    if (!entry || typeof entry !== "object") return `${labels[key] || key}: ${String(entry)}`;
+    const prescription = entry as { sets?: string; reps?: string; intensity?: string; note?: string };
+    const structure = [prescription.sets ? `${prescription.sets} séries` : "", prescription.reps ? `${prescription.reps} reps` : "", prescription.intensity || ""].filter(Boolean).join(" · ");
+    return `${labels[key] || key}: ${structure}${prescription.note ? `. ${prescription.note}` : ""}`;
+  });
+}
+
+function exerciseMetadataLabel(value: string) {
+  const labels: Record<string, string> = {
+    upper: "Membros superiores", lower: "Membros inferiores", full: "Corpo inteiro",
+    compound: "Composto", isolation: "Isolado", calisthenics: "Calistenia", mobility: "Mobilidade",
+    "horizontal-press": "Empurrar horizontal", "vertical-press": "Empurrar vertical",
+    "horizontal-pull": "Puxar horizontal", "vertical-pull": "Puxar vertical",
+    "knee-flexion": "Flexão de joelho", "knee-extension": "Extensão de joelho",
+    "hip-abduction": "Abdução de quadril", "hip-extension": "Extensão de quadril",
+    "ankle-extension": "Flexão plantar", "body-control": "Controle corporal",
+    hinge: "Dobradiça de quadril", squat: "Agachamento", lunge: "Passada",
+    fly: "Adução de ombro", curl: "Flexão de cotovelo", extension: "Extensão de cotovelo",
+    raise: "Elevação de ombro", shrug: "Elevação escapular", rotation: "Rotação",
+    carry: "Carregada", crunch: "Flexão de tronco", antirotation: "Anti-rotação",
+  };
+  return labels[value] || value;
+}
+
+function normalizeExerciseSearch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("pt-BR")
+    .trim();
+}
+
 function createSavedWorkout(savedExerciseIds: string[]): Workout | null {
   const exercises = savedExerciseIds
     .map((id) => exerciseLibrary.find((exercise) => exercise.id === id))
     .filter((exercise): exercise is LibraryExercise => Boolean(exercise))
-    .map((exercise) => ({
-      id: exercise.id,
-      name: exercise.name,
-      muscle: exercise.primary.split("·")[0].trim(),
-      sets: exercise.category === "Calistenia" ? 4 : 3,
-      reps: exercise.category === "Calistenia" ? "6–10" : "8–12",
-      load: exercise.equipment === "Peso corporal" || exercise.category === "Calistenia" ? 0 : 20,
-      rest: exercise.category === "Calistenia" ? 120 : 90,
-      rpe: 7.5,
-      note: "Adicionado da biblioteca FORGE",
-    }));
+    .map((exercise) => {
+      const prescription = exercise.prescriptions.hypertrophy;
+      const bodyweight = /peso corporal|faixa|elástico|mini band|banco|degrau/i.test(exercise.equipment) || exercise.category === "Calistenia";
+      return {
+        id: exercise.id,
+        name: exercise.name,
+        muscle: exercise.primary.split("·")[0].trim(),
+        sets: Number(prescription.sets.match(/\d+/)?.[0] || 3),
+        reps: prescription.reps,
+        load: bodyweight ? 0 : 20,
+        rest: exercise.rest,
+        rpe: 7.5,
+        note: "Adicionado da biblioteca OLYMPUS",
+      };
+    });
 
   if (exercises.length === 0) return null;
   return {
     id: "forge-next",
-    name: "Meu treino FORGE",
+    name: "Meu treino OLYMPUS",
     subtitle: "Exercícios salvos da biblioteca",
     category: "Personalizado",
     duration: Math.max(20, exercises.length * 12),
@@ -382,6 +434,49 @@ function guideForExercise(exercise: LibraryExercise) {
   };
 }
 
+function detailGuideForExercise(exercise: LibraryExercise) {
+  const fallback = guideForExercise(exercise);
+  const execution = toExerciseTextList(exercise.execution);
+  const commonErrors = toExerciseTextList(exercise.commonErrors);
+  const care = toExerciseTextList(exercise.care);
+  const variations = toExerciseTextList(exercise.variations);
+
+  return {
+    ...fallback,
+    steps: execution.length ? execution : fallback.steps,
+    range: exercise.range || "Use uma amplitude confortável, estável e compatível com a sua mobilidade.",
+    breathing: exercise.breathing || fallback.breathing,
+    errors: commonErrors.length ? commonErrors : fallback.errors,
+    cues: toExerciseTextList(exercise.cues),
+    variations: variations.length ? variations : [fallback.alternative],
+    similar: toExerciseTextList(exercise.similar),
+    care: care.length ? care : [fallback.safety],
+    prescriptions: toExerciseTextList(exercise.prescriptions),
+    rest: typeof exercise.rest === "number" ? `${exercise.rest} s` : exercise.rest || "Conforme a prescrição",
+    cadence: exercise.cadence || "Ritmo controlado, sem impulso.",
+    activation: exercise.activation || "Core ativo e articulações alinhadas.",
+    equipmentAlternative: toExerciseTextList(exercise.equipmentAlternative),
+    type: exerciseMetadataLabel(exercise.type || "Força e controle"),
+    region: exerciseMetadataLabel(exercise.region || exercise.category),
+    movement: exerciseMetadataLabel(exercise.movement || "Movimento guiado"),
+    objective: toExerciseTextList(exercise.objective),
+    tags: toExerciseTextList(exercise.tags),
+  };
+}
+
+function DetailCollection({ title, items }: { title: string; items: string[] }) {
+  if (!items.length) return null;
+
+  return (
+    <section className="detail-collection" aria-label={title}>
+      <h4>{title}</h4>
+      <ul>
+        {items.map((item, index) => <li key={`${title}-${index}`}>{item}</li>)}
+      </ul>
+    </section>
+  );
+}
+
 function DashboardView({
   onStart,
   navigate,
@@ -406,7 +501,7 @@ function DashboardView({
       <section className="forge-quick-modules" aria-label="Modalidades e serviços">
         <button onClick={() => navigate("running")}><span className="tone-blue"><Footprints size={20} /></span><strong>Corrida</strong><small>Pace, distância e planos</small><ArrowRight size={16} /></button>
         <button onClick={() => navigate("mobility")}><span className="tone-green"><HeartPulse size={20} /></span><strong>Yoga & mobilidade</strong><small>Recupere e mova-se melhor</small><ArrowRight size={16} /></button>
-        <button onClick={() => navigate("coach")}><span className="tone-violet"><Sparkles size={20} /></span><strong>FORGE AI</strong><small>Recomendação personalizada</small><ArrowRight size={16} /></button>
+        <button onClick={() => navigate("coach")}><span className="tone-violet"><Sparkles size={20} /></span><strong>OLYMPUS AI</strong><small>Recomendação personalizada</small><ArrowRight size={16} /></button>
         <button onClick={() => navigate("trainer")}><span className="tone-orange"><UserRound size={20} /></span><strong>Área profissional</strong><small>Gestão de alunos</small><ArrowRight size={16} /></button>
       </section>
 
@@ -544,7 +639,7 @@ function DashboardView({
         </article>
 
         <article className="card ai-card grid-span-5">
-          <div className="ai-card-top"><span className="ai-icon"><Sparkles size={19} /></span><span className="eyebrow">INSIGHT DO FORGE AI</span></div>
+          <div className="ai-card-top"><span className="ai-icon"><Sparkles size={19} /></span><span className="eyebrow">INSIGHT DO OLYMPUS AI</span></div>
           <h2>Você está pronto para subir a carga.</h2>
           <p>Seu supino atingiu o topo da faixa nas últimas 3 sessões com RPE médio de 7,8.</p>
           <div className="recommendation"><TrendingMini /><span><strong>+2,5 kg no supino</strong><small>92% de confiança · baseado em 3 sessões</small></span></div>
@@ -632,7 +727,7 @@ function WorkoutsView({ onStart, toast, availableWorkouts }: { onStart: (workout
           </motion.article>
         ))}
         <button className="add-workout-card" onClick={() => toast("Escolha um objetivo para gerar sua próxima rotina.")}>
-          <span><Plus size={22} /></span><strong>Nova rotina</strong><small>Crie do zero ou use o FORGE AI</small>
+          <span><Plus size={22} /></span><strong>Nova rotina</strong><small>Crie do zero ou use o OLYMPUS AI</small>
         </button>
       </section>
       <article className="card planner-card">
@@ -652,29 +747,104 @@ function WorkoutsView({ onStart, toast, availableWorkouts }: { onStart: (workout
 function LibraryView({ savedExerciseIds, onAddToNextWorkout, onToast, initialQuery }: { savedExerciseIds: string[]; onAddToNextWorkout: (exercise: LibraryExercise) => void; onToast: (message: string) => void; initialQuery: string }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("Todos");
-  const [selected, setSelected] = useState<(typeof exerciseLibrary)[number] | null>(null);
+  const [selected, setSelected] = useState<LibraryExercise | null>(null);
   const [offlineIds, setOfflineIds] = useState<string[]>([]);
   const [offlineOnly, setOfflineOnly] = useState(false);
-  const [detailTab, setDetailTab] = useState<"technique" | "safety" | "progress">("technique");
+  const [visibleCount, setVisibleCount] = useState(EXERCISES_PER_PAGE);
+  const [detailTab, setDetailTab] = useState<DetailTabId>("technique");
   const drawerCloseButtonRef = useRef<HTMLButtonElement>(null);
   const selectedTriggerRef = useRef<HTMLButtonElement>(null);
-  const categories = ["Todos", ...Array.from(new Set(exerciseLibrary.map((exercise) => exercise.category)))];
+
+  const categoryStats = useMemo(() => {
+    const counts = new Map<string, number>();
+    exerciseLibrary.forEach((exercise) => counts.set(exercise.category, (counts.get(exercise.category) || 0) + 1));
+    const availableCategories = Array.from(counts.keys());
+    const categories = [
+      "Todos",
+      ...exerciseCategoryOrder.filter((category) => counts.has(category)),
+      ...availableCategories
+        .filter((category) => !exerciseCategoryOrder.includes(category))
+        .sort((left, right) => left.localeCompare(right, "pt-BR")),
+    ];
+    return { categories, counts };
+  }, []);
+
+  const indexedExercises = useMemo(() => exerciseLibrary.map((entry) => {
+    const exercise = entry as LibraryExercise;
+    const searchable = [
+      exercise.name,
+      exercise.category,
+      exercise.equipment,
+      exercise.primary,
+      exercise.secondary,
+      exercise.level,
+      exercise.region,
+      exerciseMetadataLabel(exercise.region),
+      exercise.movement,
+      exerciseMetadataLabel(exercise.movement),
+      exercise.type,
+      exerciseMetadataLabel(exercise.type),
+      ...toExerciseTextList(exercise.objective),
+      ...toExerciseTextList(exercise.tags),
+    ].join(" ");
+    return { exercise, searchIndex: normalizeExerciseSearch(searchable) };
+  }), []);
+
+  const normalizedQuery = normalizeExerciseSearch(query);
+  const filtered = useMemo(() => indexedExercises
+    .filter(({ exercise, searchIndex }) => (
+      searchIndex.includes(normalizedQuery)
+      && (filter === "Todos" || exercise.category === filter)
+      && (!offlineOnly || offlineIds.includes(exercise.id))
+    ))
+    .map(({ exercise }) => exercise), [filter, indexedExercises, normalizedQuery, offlineIds, offlineOnly]);
+  const visibleExercises = filtered.slice(0, visibleCount);
+  const remainingExercises = Math.max(0, filtered.length - visibleExercises.length);
+  const selectedGuide = useMemo(() => (selected ? detailGuideForExercise(selected) : null), [selected]);
+  const selectedMetadata = useMemo(() => {
+    if (!selectedGuide) return [];
+    return Array.from(new Set([
+      selectedGuide.type,
+      selectedGuide.region,
+      selectedGuide.movement,
+      ...selectedGuide.objective,
+      ...selectedGuide.tags,
+    ].filter((item): item is string => Boolean(item))));
+  }, [selectedGuide]);
+
   useEffect(() => { setQuery(initialQuery); }, [initialQuery]);
+  useEffect(() => { setVisibleCount(EXERCISES_PER_PAGE); }, [query, filter, offlineOnly, offlineIds]);
   useEffect(() => {
     if (!selected) return;
     const focusTimer = window.setTimeout(() => drawerCloseButtonRef.current?.focus(), 0);
     return () => window.clearTimeout(focusTimer);
   }, [selected]);
+  useEffect(() => { void listOfflineGuides().then((items) => setOfflineIds(items.map((item) => item.id))).catch(() => undefined); }, []);
+
   const closeDrawer = () => {
     setSelected(null);
     window.setTimeout(() => selectedTriggerRef.current?.focus(), 0);
   };
-  useEffect(() => { void listOfflineGuides().then((items) => setOfflineIds(items.map((item) => item.id))).catch(() => undefined); }, []);
-  const filtered = exerciseLibrary.filter((exercise) => {
-    const searchable = [exercise.name, exercise.category, exercise.equipment, exercise.primary, exercise.secondary, exercise.level].join(" ").toLowerCase();
-    const matchesQuery = searchable.includes(query.toLowerCase());
-    return matchesQuery && (filter === "Todos" || exercise.category === filter) && (!offlineOnly || offlineIds.includes(exercise.id));
-  });
+
+  const handleDetailTabKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>, currentTab: DetailTabId) => {
+    const tabs: { id: DetailTabId; tabId: string }[] = [
+      { id: "technique", tabId: "exercise-technique-tab" },
+      { id: "safety", tabId: "exercise-safety-tab" },
+      { id: "progress", tabId: "exercise-progress-tab" },
+    ];
+    const currentIndex = tabs.findIndex((tab) => tab.id === currentTab);
+    const nextIndex = event.key === "ArrowRight" ? (currentIndex + 1) % tabs.length
+      : event.key === "ArrowLeft" ? (currentIndex + tabs.length - 1) % tabs.length
+        : event.key === "Home" ? 0
+          : event.key === "End" ? tabs.length - 1
+            : -1;
+    if (nextIndex < 0) return;
+    event.preventDefault();
+    const nextTab = tabs[nextIndex];
+    setDetailTab(nextTab.id);
+    window.setTimeout(() => document.getElementById(nextTab.tabId)?.focus(), 0);
+  };
+
   const toggleOffline = async () => {
     if (!selected) return;
     try {
@@ -683,67 +853,81 @@ function LibraryView({ savedExerciseIds, onAddToNextWorkout, onToast, initialQue
         setOfflineIds((current) => current.filter((id) => id !== selected.id));
         return;
       }
-      await saveOfflineGuide({ ...selected, steps: guideForExercise(selected).steps, savedAt: new Date().toISOString() });
+      await saveOfflineGuide({ ...selected, steps: detailGuideForExercise(selected).steps, savedAt: new Date().toISOString() });
       setOfflineIds((current) => [...current, selected.id]);
     } catch {
       onToast("Não foi possível atualizar o guia offline. Tente novamente.");
     }
   };
+
   return (
     <div className="view-stack">
       <PageIntro view="library" />
       <div className="library-toolbar card">
-        <label className="search-field large-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar por exercício ou músculo..." aria-label="Buscar exercício ou músculo" /></label>
-        <div className="filter-pills" role="group" aria-label="Filtrar por grupo muscular">
-          {categories.map((category) => <button key={category} className={filter === category ? "active" : ""} onClick={() => setFilter(category)}>{category}</button>)}
+        <label className="search-field large-search"><Search size={18} /><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Buscar exercício, músculo, objetivo ou equipamento..." aria-label="Buscar exercício, músculo, objetivo ou equipamento" /></label>
+        <div className="filter-pills" role="group" aria-label="Filtrar por categoria">
+          {categoryStats.categories.map((category) => {
+            const count = category === "Todos" ? exerciseLibrary.length : categoryStats.counts.get(category) || 0;
+            return <button key={category} type="button" aria-label={`${category}: ${count} exercícios`} className={filter === category ? "active" : ""} onClick={() => setFilter(category)}><span>{category}</span><small className="filter-count" aria-hidden="true">{count}</small></button>;
+          })}
         </div>
-        <button className={"secondary-button offline-filter " + (offlineOnly ? "active" : "")} onClick={() => setOfflineOnly((value) => !value)}><Download size={16} /> Offline ({offlineIds.length})</button>
+        <button type="button" className={"secondary-button offline-filter " + (offlineOnly ? "active" : "")} onClick={() => setOfflineOnly((value) => !value)}><Download size={16} /> Offline ({offlineIds.length})</button>
       </div>
-      <div className="library-results-row"><p><strong>{filtered.length}</strong> exercícios encontrados</p><button className="text-button">Mais usados <ChevronRight size={15} /></button></div>
+      <div className="library-results-row"><p aria-live="polite"><strong>{filtered.length}</strong> exercícios encontrados</p><span className="library-result-scope">Exibindo {visibleExercises.length} de {filtered.length}</span></div>
       {filtered.length > 0 ? (
-        <section className="exercise-grid">
-          {filtered.map((exercise, index) => (
-            <motion.button
-              className="card exercise-card"
-              key={exercise.id}
-              onClick={(event) => { selectedTriggerRef.current = event.currentTarget; setSelected(exercise); setDetailTab("technique"); }}
-              variants={fadeUp}
-              initial="hidden"
-              animate="visible"
-              transition={{ delay: index * 0.035 }}
-            >
-              <div className={"exercise-visual accent-" + exercise.accent}>
-                <Image src={exercise.image} alt={`Ilustração de ${exercise.name}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 25vw" />
-                <span className="exercise-image-shade" aria-hidden="true" />
-                <span className="favorite">{exercise.favorite ? "★" : "☆"}</span>
-                <span className="level-pill">{exercise.level}</span>
-              </div>
-              <div className="exercise-copy">
-                <p className="eyebrow">{exercise.category} · {exercise.equipment}</p>
-                <h2>{exercise.name}</h2>
-                <p><strong>{exercise.primary}</strong><small>{exercise.secondary}</small></p>
-                <span>Melhor marca <strong>{exercise.best}</strong></span><em className="accessibility-chip">{exercise.level === "Avançado" ? "Progressão necessária" : "Adaptável"}</em>
-              </div>
-            </motion.button>
-          ))}
-        </section>
+        <>
+          <section className="exercise-grid" aria-label="Exercícios encontrados">
+            {visibleExercises.map((exercise, index) => (
+              <motion.button
+                className="card exercise-card"
+                key={exercise.id}
+                onClick={(event) => { selectedTriggerRef.current = event.currentTarget; setSelected(exercise); setDetailTab("technique"); }}
+                variants={fadeUp}
+                initial="hidden"
+                animate="visible"
+                transition={{ delay: Math.min(index, 7) * 0.035 }}
+              >
+                <div className={"exercise-visual accent-" + exercise.accent}>
+                  <Image src={exercise.image} alt={`Ilustração de ${exercise.name}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 25vw" />
+                  <span className="exercise-image-shade" aria-hidden="true" />
+                  <span className="favorite">{exercise.favorite ? "★" : "☆"}</span>
+                  <span className="level-pill">{exercise.level}</span>
+                </div>
+                <div className="exercise-copy">
+                  <p className="eyebrow">{exercise.category} · {exercise.equipment}</p>
+                  <h2>{exercise.name}</h2>
+                  <p><strong>{exercise.primary}</strong><small>{exercise.secondary}</small></p>
+                  <span>Melhor marca <strong>{exercise.best}</strong></span><em className="accessibility-chip">{exercise.level === "Avançado" ? "Progressão necessária" : "Adaptável"}</em>
+                </div>
+              </motion.button>
+            ))}
+          </section>
+          {remainingExercises > 0 && <button type="button" className="secondary-button library-load-more" onClick={() => setVisibleCount((count) => Math.min(count + EXERCISES_PER_PAGE, filtered.length))}>Mostrar mais <small>{remainingExercises} restantes</small></button>}
+        </>
       ) : (
-        <div className="empty-state card"><Search size={28} /><h2>Nenhum exercício encontrado</h2><p>Tente outro termo ou remova um filtro.</p><button className="secondary-button" onClick={() => { setQuery(""); setFilter("Todos"); setOfflineOnly(false); }}>Limpar filtros</button></div>
+        <div className="empty-state card"><Search size={28} /><h2>Nenhum exercício encontrado</h2><p>Tente outro termo ou remova um filtro.</p><button type="button" className="secondary-button" onClick={() => { setQuery(""); setFilter("Todos"); setOfflineOnly(false); }}>Limpar filtros</button></div>
       )}
       <AnimatePresence>
-        {selected && (
+        {selected && selectedGuide && (
           <motion.div className="drawer-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={closeDrawer}>
             <motion.aside className="detail-drawer" role="dialog" aria-modal="true" aria-label={"Detalhes de " + selected.name} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 28, stiffness: 280 }} onMouseDown={(event) => event.stopPropagation()} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeDrawer(); return; } trapDialogFocus(event); }}>
-              <button ref={drawerCloseButtonRef} className="icon-button drawer-close" onClick={closeDrawer} aria-label="Fechar detalhes"><X size={19} /></button>
+              <button ref={drawerCloseButtonRef} type="button" className="icon-button drawer-close" onClick={closeDrawer} aria-label="Fechar detalhes"><X size={19} /></button>
               <div className={"detail-hero accent-" + selected.accent}><Image src={selected.image} alt={`Execução ilustrada de ${selected.name}`} fill sizes="(max-width: 640px) 100vw, 500px" /><span className="exercise-image-shade" aria-hidden="true" /></div>
-              <p className="eyebrow">{selected.category} · {selected.equipment}</p><h2>{selected.name}</h2><p className="drawer-description">Movimento acompanhado pelo FORGE para técnica, progressão e volume.</p>
+              <p className="eyebrow">{selected.category} · {selected.equipment}</p><h2>{selected.name}</h2><p className="drawer-description">Movimento acompanhado pelo OLYMPUS AI para técnica, progressão e volume.</p>
+              <div className="detail-context-chips" aria-label="Classificação do exercício">{selectedMetadata.map((item) => <span key={item}>{item}</span>)}</div>
               <div className="drawer-stat-grid"><div><span>Músculo principal</span><strong>{selected.primary}</strong></div><div><span>Secundários</span><strong>{selected.secondary}</strong></div><div><span>Nível</span><strong>{selected.level}</strong></div><div><span>Seu recorde</span><strong>{selected.best}</strong></div></div>
-              <div className="detail-tabs" role="tablist" aria-label="Conteúdo do exercício"><button id="exercise-technique-tab" role="tab" aria-controls="exercise-detail-panel" aria-selected={detailTab === "technique"} className={detailTab === "technique" ? "active" : ""} onClick={() => setDetailTab("technique")}>Técnica</button><button id="exercise-safety-tab" role="tab" aria-controls="exercise-detail-panel" aria-selected={detailTab === "safety"} className={detailTab === "safety" ? "active" : ""} onClick={() => setDetailTab("safety")}>Segurança</button><button id="exercise-progress-tab" role="tab" aria-controls="exercise-detail-panel" aria-selected={detailTab === "progress"} className={detailTab === "progress" ? "active" : ""} onClick={() => setDetailTab("progress")}>Evolução</button></div>
-              {detailTab === "technique" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-technique-tab" className="exercise-detail-panel"><h3>Execução</h3><ol className="execution-steps">{guideForExercise(selected).steps.map((step) => <li key={step}>{step}</li>)}</ol><div className="breathing-note"><Activity size={17} /><span><strong>Respiração</strong><small>{guideForExercise(selected).breathing}</small></span></div></div>}
-              {detailTab === "safety" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-safety-tab" className="exercise-detail-panel"><h3>Segurança e erros comuns</h3><ul className="detail-bullet-list">{guideForExercise(selected).errors.map((error) => <li key={error}><X size={15} /> {error}</li>)}</ul><div className="warning-note"><Gauge size={18} /><span><strong>Priorize conforto e técnica</strong><small>{guideForExercise(selected).safety}</small></span></div></div>}
-              {detailTab === "progress" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-progress-tab" className="exercise-detail-panel"><h3>Progressão sugerida</h3><div className="exercise-progression"><span><strong>1</strong><small>Domine a amplitude e o controle.</small></span><span><strong>2</strong><small>Avance carga ou repetições gradualmente.</small></span><span><strong>3</strong><small>Use alternativa: {guideForExercise(selected).alternative}</small></span></div></div>}
-              <button className="secondary-button full-button" onClick={() => void toggleOffline()}>{offlineIds.includes(selected.id) ? <><Check size={17} /> Disponível offline</> : <><Download size={17} /> Baixar guia offline</>}</button>
-              <button className="primary-button full-button" onClick={() => onAddToNextWorkout(selected)}>{savedExerciseIds.includes(selected.id) ? <><Check size={17} /> No próximo treino</> : <><Plus size={17} /> Adicionar ao treino</>}</button>
+              <div className="detail-tabs" role="tablist" aria-label="Conteúdo do exercício">
+                {([[
+                  "technique", "Técnica", "exercise-technique-tab"],
+                  ["safety", "Segurança", "exercise-safety-tab"],
+                  ["progress", "Evolução", "exercise-progress-tab"],
+                ] as const).map(([tab, label, tabId]) => <button key={tab} id={tabId} type="button" role="tab" aria-controls="exercise-detail-panel" aria-selected={detailTab === tab} tabIndex={detailTab === tab ? 0 : -1} className={detailTab === tab ? "active" : ""} onClick={() => setDetailTab(tab)} onKeyDown={(event) => handleDetailTabKeyDown(event, tab)}>{label}</button>)}
+              </div>
+              {detailTab === "technique" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-technique-tab" className="exercise-detail-panel"><h3>Execução</h3><ol className="execution-steps">{selectedGuide.steps.map((step, index) => <li key={`execution-${index}`}>{step}</li>)}</ol><div className="breathing-note"><Activity size={17} /><span><strong>Respiração</strong><small>{selectedGuide.breathing}</small></span></div><div className="detail-fact-grid" aria-label="Parâmetros de execução"><div><span>Amplitude</span><strong>{selectedGuide.range}</strong></div><div><span>Cadência</span><strong>{selectedGuide.cadence}</strong></div><div><span>Ativação</span><strong>{selectedGuide.activation}</strong></div><div><span>Descanso</span><strong>{selectedGuide.rest}</strong></div></div><DetailCollection title="Cues de execução" items={selectedGuide.cues} /></div>}
+              {detailTab === "safety" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-safety-tab" className="exercise-detail-panel"><h3>Segurança e erros comuns</h3><ul className="detail-bullet-list">{selectedGuide.errors.map((error, index) => <li key={`error-${index}`}><X size={15} /> {error}</li>)}</ul><div className="warning-note"><Gauge size={18} /><span><strong>Priorize conforto e técnica</strong><small>{selectedGuide.care.join(" ")}</small></span></div>{selectedGuide.equipmentAlternative.length > 0 && <div className="equipment-note"><Dumbbell size={17} /><span><strong>Alternativas de equipamento</strong><small>{selectedGuide.equipmentAlternative.join(" · ")}</small></span></div>}</div>}
+              {detailTab === "progress" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-progress-tab" className="exercise-detail-panel"><h3>Variações e progressão</h3><div className="detail-collection-grid"><DetailCollection title="Variações" items={selectedGuide.variations} /><DetailCollection title="Prescrição" items={selectedGuide.prescriptions} /><DetailCollection title="Exercícios similares" items={selectedGuide.similar} /></div></div>}
+              <button type="button" className="secondary-button full-button" onClick={() => void toggleOffline()}>{offlineIds.includes(selected.id) ? <><Check size={17} /> Disponível offline</> : <><Download size={17} /> Baixar guia offline</>}</button>
+              <button type="button" className="primary-button full-button" onClick={() => onAddToNextWorkout(selected)}>{savedExerciseIds.includes(selected.id) ? <><Check size={17} /> No próximo treino</> : <><Plus size={17} /> Adicionar ao treino</>}</button>
             </motion.aside>
           </motion.div>
         )}
@@ -873,7 +1057,7 @@ function CoachView({ onStart }: { onStart: (workout: Workout) => void }) {
         <aside className="coach-context">
           <article className="card coach-status">
             <div className="coach-avatar"><BrainCircuit size={25} /><span /></div>
-            <div><p className="eyebrow">FORGE AI</p><h2>Seu copiloto de performance</h2><span className="online-label"><i /> Modelo demonstrativo local</span></div>
+            <div><p className="eyebrow">OLYMPUS AI</p><h2>Seu copiloto de performance</h2><span className="online-label"><i /> Modelo demonstrativo local</span></div>
           </article>
           <article className="card coach-insight-list">
             <p className="eyebrow">ANÁLISES PRIORITÁRIAS</p>
@@ -900,7 +1084,7 @@ function CoachView({ onStart }: { onStart: (workout: Workout) => void }) {
             <input value={input} onChange={(event) => setInput(event.target.value)} placeholder="Pergunte sobre seu treino, recuperação ou metas..." aria-label="Mensagem para o Coach" />
             <button type="submit" aria-label="Enviar mensagem" disabled={!input.trim() || typing}><Send size={17} /></button>
           </form>
-          <p className="ai-disclaimer">O FORGE AI demonstra recomendações; decisões de saúde exigem avaliação profissional.</p>
+          <p className="ai-disclaimer">O OLYMPUS AI demonstra recomendações; decisões de saúde exigem avaliação profissional.</p>
         </article>
       </section>
       <article className="coach-action-banner">
@@ -1011,7 +1195,7 @@ function WorkoutSession({
                   <div className="exercise-complete"><strong>{completedForExercise}/{exercise.sets}</strong><small>séries</small></div>
                   <div className="session-exercise-actions"><button onClick={() => onToast(`Alternativa para ${exercise.name}: reduza a carga, use versão assistida ou ajuste o equipamento.`)}>Alternativa</button><button onClick={() => toggleSkipExercise(exercise)}>{skipped ? "Retomar" : "Pular"}</button></div>
                 </div>
-                {skipped ? <div className="skipped-exercise-note"><Check size={17} /><span><strong>Exercício pulado</strong><small>O FORGE preservou esse registro. Você pode retomar quando quiser.</small></span></div> : <><div className="set-table-head"><span>SÉRIE</span><span>ANTERIOR</span><span>CARGA (KG)</span><span>REPS</span><span>RPE</span><span>FEITO</span></div>
+                {skipped ? <div className="skipped-exercise-note"><Check size={17} /><span><strong>Exercício pulado</strong><small>O OLYMPUS preservou esse registro. Você pode retomar quando quiser.</small></span></div> : <><div className="set-table-head"><span>SÉRIE</span><span>ANTERIOR</span><span>CARGA (KG)</span><span>REPS</span><span>RPE</span><span>FEITO</span></div>
                 <div className="set-list">
                   {Array.from({ length: exercise.sets }, (_, setIndex) => {
                     const id = [exercise.id, setIndex].join("-");
@@ -1149,12 +1333,13 @@ export function PerformanceApp() {
 
   useEffect(() => {
     try {
-      const savedSession = window.localStorage.getItem("forge-active-session") || window.localStorage.getItem("pulse-active-session");
-      const savedHistory = window.localStorage.getItem("forge-workout-history") || window.localStorage.getItem("pulse-workout-history");
-      const savedProfileSettings = window.localStorage.getItem("forge-profile-settings");
-      const savedExerciseQueue = window.localStorage.getItem("forge-next-workout-exercises");
-      const savedView = (window.localStorage.getItem("forge-view") || window.localStorage.getItem("pulse-view")) as ViewId | null;
-      const savedTheme = window.localStorage.getItem("forge-theme") === "dark" ? "dark" : "light";
+      const savedSession = window.localStorage.getItem("olympus-active-session") || window.localStorage.getItem("forge-active-session") || window.localStorage.getItem("pulse-active-session");
+      const savedHistory = window.localStorage.getItem("olympus-workout-history") || window.localStorage.getItem("forge-workout-history") || window.localStorage.getItem("pulse-workout-history");
+      const savedProfileSettings = window.localStorage.getItem("olympus-profile-settings") || window.localStorage.getItem("forge-profile-settings");
+      const savedExerciseQueue = window.localStorage.getItem("olympus-next-workout-exercises") || window.localStorage.getItem("forge-next-workout-exercises");
+      const savedView = (window.localStorage.getItem("olympus-view") || window.localStorage.getItem("forge-view") || window.localStorage.getItem("pulse-view")) as ViewId | null;
+      const storedTheme = window.localStorage.getItem("olympus-theme") || window.localStorage.getItem("forge-theme");
+      const savedTheme = storedTheme === "dark" ? "dark" : "light";
       setTheme(savedTheme);
       document.documentElement.dataset.theme = savedTheme;
       let hasValidSession = false;
@@ -1170,6 +1355,8 @@ export function PerformanceApp() {
           });
           hasValidSession = true;
         } else {
+          window.localStorage.removeItem("olympus-active-session");
+          window.localStorage.removeItem("forge-active-session");
           window.localStorage.removeItem("pulse-active-session");
         }
       }
@@ -1187,7 +1374,8 @@ export function PerformanceApp() {
       }
       if (savedView && navItems.some((item) => item.id === savedView)) setView(savedView);
       const shortcut = new URLSearchParams(window.location.search);
-      setOnboardingOpen(shortcut.get("onboarding") === "1" || (shortcut.get("onboarding") !== "0" && !window.localStorage.getItem("forge-onboarding-complete")));
+      const onboardingComplete = window.localStorage.getItem("olympus-onboarding-complete") || window.localStorage.getItem("forge-onboarding-complete");
+      setOnboardingOpen(shortcut.get("onboarding") === "1" || (shortcut.get("onboarding") !== "0" && !onboardingComplete));
       const shortcutView = shortcut.get("view") as ViewId | null;
       if (shortcutView && navItems.some((item) => item.id === shortcutView)) setView(shortcutView);
       if (shortcut.get("action") === "start-workout") {
@@ -1202,6 +1390,8 @@ export function PerformanceApp() {
         window.history.replaceState(null, "", window.location.pathname + (query ? "?" + query : "") + window.location.hash);
       }
     } catch {
+      window.localStorage.removeItem("olympus-active-session");
+      window.localStorage.removeItem("forge-active-session");
       window.localStorage.removeItem("pulse-active-session");
     }
     setOnline(navigator.onLine);
@@ -1249,29 +1439,37 @@ export function PerformanceApp() {
 
   useEffect(() => {
     if (!isHydrated) return;
-    window.localStorage.setItem("forge-view", view);
+    window.localStorage.setItem("olympus-view", view);
+    window.localStorage.removeItem("forge-view");
+    window.localStorage.removeItem("pulse-view");
   }, [isHydrated, view]);
 
   useEffect(() => {
     if (!isHydrated) return;
-    if (activeSession) window.localStorage.setItem("forge-active-session", JSON.stringify(activeSession));
-    else window.localStorage.removeItem("forge-active-session");
+    if (activeSession) window.localStorage.setItem("olympus-active-session", JSON.stringify(activeSession));
+    else window.localStorage.removeItem("olympus-active-session");
+    window.localStorage.removeItem("forge-active-session");
+    window.localStorage.removeItem("pulse-active-session");
   }, [activeSession, isHydrated]);
 
   useEffect(() => {
     if (!isHydrated) return;
-    window.localStorage.setItem("forge-workout-history", JSON.stringify(history));
+    window.localStorage.setItem("olympus-workout-history", JSON.stringify(history));
+    window.localStorage.removeItem("forge-workout-history");
+    window.localStorage.removeItem("pulse-workout-history");
   }, [history, isHydrated]);
 
   useEffect(() => {
     if (!isHydrated) return;
-    window.localStorage.setItem("forge-next-workout-exercises", JSON.stringify(savedExerciseIds));
+    window.localStorage.setItem("olympus-next-workout-exercises", JSON.stringify(savedExerciseIds));
+    window.localStorage.removeItem("forge-next-workout-exercises");
   }, [isHydrated, savedExerciseIds]);
 
   useEffect(() => {
     if (!isHydrated) return;
     document.documentElement.dataset.theme = theme;
-    window.localStorage.setItem("forge-theme", theme);
+    window.localStorage.setItem("olympus-theme", theme);
+    window.localStorage.removeItem("forge-theme");
   }, [isHydrated, theme]);
 
   useEffect(() => {
@@ -1307,14 +1505,17 @@ export function PerformanceApp() {
   };
 
   const completeOnboarding = (data: ForgeOnboardingData) => {
-    window.localStorage.setItem("forge-onboarding-complete", "true");
-    window.localStorage.setItem("forge-profile-settings", JSON.stringify(data));
+    window.localStorage.setItem("olympus-onboarding-complete", "true");
+    window.localStorage.setItem("olympus-profile-settings", JSON.stringify(data));
+    window.localStorage.removeItem("forge-onboarding-complete");
+    window.localStorage.removeItem("forge-profile-settings");
     setProfileSettings(data);
     setOnboardingOpen(false);
     navigate("dashboard");
   };
 
   const resetOnboarding = () => {
+    window.localStorage.removeItem("olympus-onboarding-complete");
     window.localStorage.removeItem("forge-onboarding-complete");
     const url = new URL(window.location.href);
     url.searchParams.set("onboarding", "1");
@@ -1324,7 +1525,7 @@ export function PerformanceApp() {
 
   const addToNextWorkout = (exercise: LibraryExercise) => {
     if (activeSession?.workoutId === "forge-next") {
-      setToastMessage("Finalize seu treino FORGE atual antes de alterar os exercícios salvos.");
+      setToastMessage("Finalize seu treino OLYMPUS atual antes de alterar os exercícios salvos.");
       return;
     }
     if (savedExerciseIds.includes(exercise.id)) {
@@ -1442,7 +1643,7 @@ export function PerformanceApp() {
       <div className="app-main">
         <header className="topbar">
           <div className="mobile-brand"><BrandMark compact /><button className="icon-button menu-button" onClick={() => setMobileMenu(true)} aria-label="Abrir menu"><Menu size={20} /></button></div>
-          <form className="search-field global-search" onSubmit={(event) => { event.preventDefault(); submitGlobalSearch(); }}><Search size={17} /><input ref={globalSearchRef} value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} placeholder="Buscar treino, exercício ou métrica..." aria-label="Buscar no FORGE" /><kbd>⌘ K</kbd></form>
+          <form className="search-field global-search" onSubmit={(event) => { event.preventDefault(); submitGlobalSearch(); }}><Search size={17} /><input ref={globalSearchRef} value={globalSearch} onChange={(event) => setGlobalSearch(event.target.value)} placeholder="Buscar treino, exercício ou métrica..." aria-label="Buscar no OLYMPUS AI" /><kbd>⌘ K</kbd></form>
           <div className="topbar-actions">
             {!online && <span className="offline-badge"><WifiOff size={14} /> Offline</span>}
             <button className="platform-button" onClick={installApp}><Download size={16} /><span>Instalar app</span></button>
@@ -1505,7 +1706,7 @@ export function PerformanceApp() {
               <div className="mobile-menu-head"><BrandMark /><button className="icon-button" onClick={() => setMobileMenu(false)} aria-label="Fechar menu"><X size={19} /></button></div>
               <div className="mobile-profile"><span className="avatar large-avatar">{athlete.initials}<i /></span><span><strong>{athlete.fullName}</strong><small>Nível {athlete.level} · {profileSettings.goal}</small></span></div>
               <nav>{navItems.map((item) => { const Icon = item.icon; return <button key={item.id} className={view === item.id ? "active" : ""} onClick={() => navigate(item.id)}><Icon size={19} /><span><strong>{item.label}</strong><small>{item.description}</small></span><ChevronRight size={16} /></button>; })}</nav>
-              <button className="install-mobile-button" onClick={installApp}><Download size={18} /><span><strong>Instalar FORGE</strong><small>Android e iOS · acesso rápido</small></span></button>
+              <button className="install-mobile-button" onClick={installApp}><Download size={18} /><span><strong>Instalar OLYMPUS AI</strong><small>Android e iOS · acesso rápido</small></span></button>
             </motion.aside>
           </motion.div>
         )}

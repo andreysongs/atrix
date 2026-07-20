@@ -26,6 +26,23 @@ async function transaction<T>(mode: IDBTransactionMode, action: (store: IDBObjec
   }).finally(() => database.close());
 }
 
-export function saveOfflineGuide(guide: OfflineExerciseGuide) { return transaction("readwrite", (store) => store.put(guide)); }
-export function removeOfflineGuide(id: string) { return transaction("readwrite", (store) => store.delete(id)); }
+const offlineMediaCache = "olympus-exercise-guides-v1";
+
+export async function saveOfflineGuide(guide: OfflineExerciseGuide) {
+  await transaction("readwrite", (store) => store.put(guide));
+  if ("caches" in globalThis) {
+    const cache = await caches.open(offlineMediaCache);
+    await cache.add(guide.image).catch(() => undefined);
+  }
+}
+
+export async function removeOfflineGuide(id: string) {
+  const guides = await listOfflineGuides();
+  const guide = guides.find((item) => item.id === id);
+  await transaction("readwrite", (store) => store.delete(id));
+  if (guide && "caches" in globalThis) {
+    const cache = await caches.open(offlineMediaCache);
+    await cache.delete(guide.image);
+  }
+}
 export function listOfflineGuides() { return transaction<OfflineExerciseGuide[]>("readonly", (store) => store.getAll()); }

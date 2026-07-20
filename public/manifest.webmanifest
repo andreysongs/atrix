@@ -1,7 +1,7 @@
 {
-  "name": "FORGE — Build Your Best",
-  "short_name": "FORGE",
-  "description": "Treinos, recuperação e evolução em uma experiência fitness premium.",
+  "name": "OLYMPUS AI — Treine com inteligência",
+  "short_name": "OLYMPUS AI",
+  "description": "Treine com inteligência. Evolua sem limites.",
   "lang": "pt-BR",
   "dir": "ltr",
   "id": "/",
@@ -14,8 +14,8 @@
     "minimal-ui"
   ],
   "orientation": "any",
-  "background_color": "#F8FAFC",
-  "theme_color": "#2563EB",
+  "background_color": "#030303",
+  "theme_color": "#C99A3D",
   "categories": [
     "fitness",
     "health",
@@ -27,50 +27,62 @@
       "src": "/icons/icon-48.webp",
       "type": "image/webp",
       "sizes": "48x48",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-72.webp",
       "type": "image/webp",
       "sizes": "72x72",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-96.webp",
       "type": "image/webp",
       "sizes": "96x96",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-128.webp",
       "type": "image/webp",
       "sizes": "128x128",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-192.webp",
       "type": "image/webp",
       "sizes": "192x192",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-256.webp",
       "type": "image/webp",
       "sizes": "256x256",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "/icons/icon-512.webp",
       "type": "image/webp",
       "sizes": "512x512",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-192.webp",
+      "type": "image/webp",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/maskable-512.webp",
+      "type": "image/webp",
+      "sizes": "512x512",
+      "purpose": "maskable"
     }
   ],
   "shortcuts": [
     {
       "name": "Iniciar treino",
       "short_name": "Treinar",
-      "description": "Abra o FORGE pronto para começar um treino.",
+      "description": "Abra o OLYMPUS AI pronto para começar um treino.",
       "url": "/?action=start-workout",
       "icons": [
         {

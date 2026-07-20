@@ -15,10 +15,11 @@ export type ApiSessionInput = {
   sets: ApiPerformedSet[];
 };
 
-const pendingKey = "pulse-api-pending-sessions";
+const pendingKey = "olympus-api-pending-sessions";
+const legacyPendingKey = "pulse-api-pending-sessions";
 
 export function apiBaseUrl() {
-  const configuredUrl = process.env.NEXT_PUBLIC_FORGE_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL;
+  const configuredUrl = process.env.NEXT_PUBLIC_OLYMPUS_API_URL || process.env.NEXT_PUBLIC_FORGE_API_URL || process.env.NEXT_PUBLIC_PULSE_API_URL;
   if (configuredUrl) return configuredUrl.replace(/\/$/, "");
   if (typeof window !== "undefined" && /^https?:$/.test(window.location.protocol)) {
     return window.location.protocol + "//" + window.location.hostname + ":4000/api/v1";
@@ -48,7 +49,7 @@ export async function registerPushDevice(input: { token: string; platform: "andr
 
 export function queueWorkoutSession(session: ApiSessionInput) {
   if (typeof window === "undefined") return;
-  const current = JSON.parse(window.localStorage.getItem(pendingKey) || "[]") as ApiSessionInput[];
+  const current = JSON.parse(window.localStorage.getItem(pendingKey) || window.localStorage.getItem(legacyPendingKey) || "[]") as ApiSessionInput[];
   if (!current.some((item) => item.localId === session.localId)) {
     window.localStorage.setItem(pendingKey, JSON.stringify([...current, session]));
   }
@@ -56,7 +57,7 @@ export function queueWorkoutSession(session: ApiSessionInput) {
 
 export async function flushWorkoutSessionQueue() {
   if (typeof window === "undefined") return 0;
-  const current = JSON.parse(window.localStorage.getItem(pendingKey) || "[]") as ApiSessionInput[];
+  const current = JSON.parse(window.localStorage.getItem(pendingKey) || window.localStorage.getItem(legacyPendingKey) || "[]") as ApiSessionInput[];
   const remaining: ApiSessionInput[] = [];
   let synced = 0;
   for (const session of current) {
@@ -68,5 +69,6 @@ export async function flushWorkoutSessionQueue() {
     }
   }
   window.localStorage.setItem(pendingKey, JSON.stringify(remaining));
+  window.localStorage.removeItem(legacyPendingKey);
   return synced;
 }

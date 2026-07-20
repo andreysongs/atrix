@@ -2,11 +2,11 @@ import type { CapacitorConfig } from "@capacitor/cli";
 
 const config: CapacitorConfig = {
   appId: "com.pulse.performance",
-  appName: "FORGE",
+  appName: "OLYMPUS AI",
   webDir: "out",
-  backgroundColor: "#f8fafc",
-  android: { backgroundColor: "#f8fafc" },
-  ios: { backgroundColor: "#f8fafc", contentInset: "automatic" },
+  backgroundColor: "#030303",
+  android: { backgroundColor: "#030303" },
+  ios: { backgroundColor: "#030303", contentInset: "automatic" },
 };
 
 export default config;

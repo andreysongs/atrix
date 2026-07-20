@@ -1,4 +1,4 @@
-# Pulse REST API
+# OLYMPUS AI REST API
 
 API NestJS local criada para substituir a dependência Firebase/Appy Pie observada no `Nike_Sports.apk`.
 

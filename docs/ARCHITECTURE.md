@@ -1,8 +1,8 @@
-# Arquitetura do Pulse Performance OS
+# Arquitetura do OLYMPUS AI
 
 ## 1. Objetivo e decisões principais
 
-O Pulse pretende unificar treino de força, atividades de endurance, metas, bem-estar e análise de evolução. A implementação atual é uma demo frontend; a arquitetura abaixo descreve como evoluí-la sem fingir que serviços ainda inexistentes estão prontos.
+O OLYMPUS AI unifica treino de força, atividades de endurance, metas, bem-estar e análise de evolução. A arquitetura abaixo descreve a base funcional atual e como evoluí-la com segurança.
 
 Decisões estruturais:
 

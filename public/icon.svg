@@ -1,13 +1,16 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
-  <title id="title">FORGE</title>
-  <desc id="description">Símbolo FORGE em azul e verde-lima para treino e evolução.</desc>
+  <title id="title">OLYMPUS AI</title>
+  <desc id="description">Emblema circular metálico do OLYMPUS AI com raio dourado.</desc>
   <defs>
-    <linearGradient id="forge-blue" x1="64" y1="38" x2="448" y2="478" gradientUnits="userSpaceOnUse"><stop stop-color="#3B82F6"/><stop offset=".54" stop-color="#2563EB"/><stop offset="1" stop-color="#1E3A8A"/></linearGradient>
-    <linearGradient id="forge-energy" x1="182" y1="127" x2="374" y2="382" gradientUnits="userSpaceOnUse"><stop stop-color="#D9F99D"/><stop offset="1" stop-color="#84CC16"/></linearGradient>
+    <linearGradient id="metal" x1="74" y1="76" x2="438" y2="436" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f5f5f5"/><stop offset=".25" stop-color="#4a4a4a"/><stop offset=".56" stop-color="#171717"/><stop offset=".78" stop-color="#e2b65b"/><stop offset="1" stop-color="#7c4d10"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="148" y1="414" x2="388" y2="98" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#7c4d10"/><stop offset=".48" stop-color="#e2b65b"/><stop offset=".72" stop-color="#fff0b5"/><stop offset="1" stop-color="#a76b18"/>
+    </linearGradient>
   </defs>
-  <rect width="512" height="512" rx="124" fill="url(#forge-blue)"/>
-  <rect x="14" y="14" width="484" height="484" rx="110" fill="none" stroke="#fff" stroke-opacity=".18" stroke-width="2"/>
-  <path d="M154 120h224v63H229v60h125v59H229v91h-75V120Z" fill="#fff"/>
-  <path d="m319 112 91 140-99 148-38-49 61-99-58-91 43-49Z" fill="url(#forge-energy)"/>
-  <circle cx="380" cy="126" r="13" fill="#D9F99D"/>
+  <rect width="512" height="512" rx="124" fill="#030303"/>
+  <circle cx="256" cy="247" r="174" fill="none" stroke="url(#metal)" stroke-width="24"/>
+  <path d="M210 145c38-37 103-28 127 18-18-9-39-9-55-1 26 9 42 29 45 55-14-13-31-20-49-21 12 19 14 43 5 64-8-18-22-33-41-42-3 35-18 69-46 92 8-27 7-55-3-82-13 25-34 45-59 57 20-31 28-67 22-103 17-3 36-16 54-37Z" fill="#202020" stroke="#8f8f8f" stroke-width="5"/>
+  <path d="M374 80 214 270h78L140 443l230-217h-84L374 80Z" fill="url(#gold)" stroke="#ffe9a4" stroke-width="4"/>
 </svg>

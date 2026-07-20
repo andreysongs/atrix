@@ -1,5 +1,5 @@
 {
-  "name": "forge-training-platform",
+  "name": "olympus-ai-training-platform",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,8 +9,9 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "assets:generate": "capacitor-assets generate --iconBackgroundColor '#F8FAFC' --iconBackgroundColorDark '#0B1220' --splashBackgroundColor '#F8FAFC' --splashBackgroundColorDark '#0B1220' --logoSplashScale 0.2",
-    "assets:forge": "node scripts/generate-forge-icons.mjs",
+    "assets:generate": "capacitor-assets generate --ios --android --iconBackgroundColor=\"#030303\" --iconBackgroundColorDark=\"#030303\" --splashBackgroundColor=\"#030303\" --splashBackgroundColorDark=\"#030303\" --logoSplashScale 0.34",
+    "assets:olympus": "node scripts/generate-olympus-brand-assets.mjs",
+    "assets:exercises": "node scripts/process-exercise-photo-sheets.mjs --strict",
     "mobile:sync": "npm run build && cap sync",
     "mobile:android": "npm run mobile:sync && cap open android",
     "mobile:ios": "npm run mobile:sync && cap open ios",

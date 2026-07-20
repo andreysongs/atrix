@@ -10,7 +10,7 @@ async function bootstrap() {
   app.enableShutdownHooks();
   const port = Number(process.env.PORT || 4000);
   await app.listen(port, "0.0.0.0");
-  console.log(`Pulse API listening on http://0.0.0.0:${port}/api/v1`);
+  console.log(`OLYMPUS AI API listening on http://0.0.0.0:${port}/api/v1`);
 }
 
 void bootstrap();

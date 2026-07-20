@@ -1,13 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
-  <title id="title">FORGE</title>
-  <desc id="description">Ícone adaptável FORGE em azul e verde-lima.</desc>
-  <defs>
-    <linearGradient id="forge-blue" x1="64" y1="38" x2="448" y2="478" gradientUnits="userSpaceOnUse"><stop stop-color="#3B82F6"/><stop offset=".54" stop-color="#2563EB"/><stop offset="1" stop-color="#1E3A8A"/></linearGradient>
-    <linearGradient id="forge-energy" x1="182" y1="127" x2="374" y2="382" gradientUnits="userSpaceOnUse"><stop stop-color="#D9F99D"/><stop offset="1" stop-color="#84CC16"/></linearGradient>
-  </defs>
-  <rect width="512" height="512" fill="url(#forge-blue)"/>
-  <circle cx="256" cy="256" r="192" fill="#1E40AF" fill-opacity=".23"/>
-  <path d="M154 120h224v63H229v60h125v59H229v91h-75V120Z" fill="#fff"/>
-  <path d="m319 112 91 140-99 148-38-49 61-99-58-91 43-49Z" fill="url(#forge-energy)"/>
-  <circle cx="380" cy="126" r="13" fill="#D9F99D"/>
+  <title id="title">OLYMPUS AI</title>
+  <desc id="description">Ícone adaptável preto e dourado do OLYMPUS AI.</desc>
+  <defs><linearGradient id="gold" x1="155" y1="416" x2="384" y2="94"><stop stop-color="#765015"/><stop offset=".48" stop-color="#e1b55a"/><stop offset=".72" stop-color="#fff0b5"/><stop offset="1" stop-color="#9e6516"/></linearGradient><linearGradient id="ring"><stop stop-color="#d7d7d7"/><stop offset=".5" stop-color="#292929"/><stop offset="1" stop-color="#c7953e"/></linearGradient></defs>
+  <rect width="512" height="512" fill="#030303"/>
+  <circle cx="256" cy="247" r="151" fill="none" stroke="url(#ring)" stroke-width="22"/>
+  <path d="M215 159c34-31 91-23 111 17-17-7-34-7-49 0 22 8 36 26 39 47-14-10-29-16-44-16 9 17 10 37 3 55-8-16-20-28-36-35-3 30-16 58-40 78 7-25 6-49-3-71-11 21-29 37-50 47 17-26 24-57 19-87 16-4 33-14 50-35Z" fill="#222" stroke="#888" stroke-width="5"/>
+  <path d="M366 92 223 267h70L157 424l207-198h-75L366 92Z" fill="url(#gold)" stroke="#ffe8a0" stroke-width="4"/>
 </svg>

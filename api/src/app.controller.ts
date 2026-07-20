@@ -7,7 +7,7 @@ export class AppController {
   constructor(private readonly database: DatabaseService) {}
 
   @Get("health")
-  health() { return { status: "ok", service: "pulse-api", version: "1.0.0", timestamp: new Date().toISOString() }; }
+  health() { return { status: "ok", service: "olympus-ai-api", version: "1.0.0", timestamp: new Date().toISOString() }; }
 
   @Get("app-config")
   appConfig() {
