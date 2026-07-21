@@ -28,9 +28,17 @@ createServer(async (request, response) => {
     const details = await stat(file).catch(() => null);
     if (details?.isDirectory()) file = resolve(file, "index.html");
     const body = await readFile(file);
+    const pathname = url.pathname;
+    const cacheControl = file.endsWith(".html") || pathname === "/sw.js" || pathname === "/manifest.webmanifest"
+      ? "no-cache"
+      : pathname.startsWith("/_next/static/")
+        ? "public, max-age=31536000, immutable"
+        : pathname.startsWith("/media/exercises/olympus/")
+          ? "public, max-age=0, must-revalidate"
+          : "public, max-age=3600, must-revalidate";
     response.writeHead(200, {
       "Content-Type": types[extname(file)] || "application/octet-stream",
-      "Cache-Control": file.endsWith(".html") ? "no-cache" : "public, max-age=31536000, immutable",
+      "Cache-Control": cacheControl,
     });
     response.end(body);
   } catch {

@@ -26,7 +26,7 @@ async function transaction<T>(mode: IDBTransactionMode, action: (store: IDBObjec
   }).finally(() => database.close());
 }
 
-const offlineMediaCache = "olympus-exercise-guides-v1";
+const offlineMediaCache = "olympus-exercise-guides-v2";
 
 export async function saveOfflineGuide(guide: OfflineExerciseGuide) {
   await transaction("readwrite", (store) => store.put(guide));

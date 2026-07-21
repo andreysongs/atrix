@@ -1,8 +1,8 @@
-const CACHE_VERSION = "v7";
+const CACHE_VERSION = "v8";
 const SHELL_CACHE = `olympus-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `olympus-assets-${CACHE_VERSION}`;
 const MEDIA_CACHE = "olympus-guided-media-v1";
-const GUIDE_CACHE = "olympus-exercise-guides-v1";
+const GUIDE_CACHE = "olympus-exercise-guides-v2";
 const OLYMPUS_CACHES = new Set([SHELL_CACHE, ASSET_CACHE, MEDIA_CACHE, GUIDE_CACHE]);
 const OFFLINE_FALLBACK = "/";
 const PRECACHE_URLS = [
@@ -60,6 +60,11 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  if (url.pathname.startsWith("/media/exercises/olympus/")) {
+    event.respondWith(networkFirstExerciseImage(request));
+    return;
+  }
+
   if (isStaticAsset(request, url)) {
     event.respondWith(cacheFirstAsset(request));
   }
@@ -113,6 +118,31 @@ async function cacheFirstAsset(request) {
   }
 
   return networkResponse;
+}
+
+async function networkFirstExerciseImage(request) {
+  const cache = await caches.open(ASSET_CACHE);
+
+  try {
+    // `reload` also bypasses an older immutable response in the browser's HTTP cache.
+    const networkResponse = await fetch(request, { cache: "reload" });
+    if (isCacheableResponse(networkResponse)) {
+      await cache.put(request, networkResponse.clone());
+      await trimCache(cache, MAX_ASSET_ENTRIES);
+    }
+    return networkResponse;
+  } catch {
+    const cachedResponse = await cache.match(request, { ignoreSearch: false });
+    if (cachedResponse) return cachedResponse;
+
+    const savedGuideResponse = await (await caches.open(GUIDE_CACHE)).match(request, { ignoreSearch: true });
+    if (savedGuideResponse) return savedGuideResponse;
+
+    return new Response("Imagem indisponível enquanto o dispositivo está offline.", {
+      status: 503,
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  }
 }
 
 async function cacheShellAndBuildAssets() {
