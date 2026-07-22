@@ -12,6 +12,7 @@
     "assets:generate": "capacitor-assets generate --ios --android --iconBackgroundColor=\"#030303\" --iconBackgroundColorDark=\"#030303\" --splashBackgroundColor=\"#030303\" --splashBackgroundColorDark=\"#030303\" --logoSplashScale 0.34",
     "assets:olympus": "node scripts/generate-olympus-brand-assets.mjs",
     "assets:exercises": "node scripts/process-exercise-photo-sheets.mjs --strict",
+    "motion:validate": "node scripts/validate-exercise-motion.mjs",
     "mobile:sync": "npm run build && cap sync",
     "mobile:android": "npm run mobile:sync && cap open android",
     "mobile:ios": "npm run mobile:sync && cap open ios",

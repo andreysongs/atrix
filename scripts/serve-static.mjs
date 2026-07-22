@@ -3,7 +3,7 @@ import { readFile, stat } from "node:fs/promises";
 import { networkInterfaces } from "node:os";
 import { extname, resolve, sep } from "node:path";
 
-const root = resolve("out");
+const root = resolve(".next-build");
 const port = Number(process.env.PORT || 4173);
 const types = {
   ".css": "text/css; charset=utf-8",

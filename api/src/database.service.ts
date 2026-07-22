@@ -83,7 +83,13 @@ export class DatabaseService implements OnModuleInit {
   }
 
   async add<T extends object>(collection: "exercises" | "workouts" | "sessions" | "goals", input: T) {
-    const record = { id: randomUUID(), ...input, createdAt: new Date().toISOString() };
+    const id = randomUUID();
+    const record = {
+      id,
+      ...input,
+      ...(collection === "exercises" ? { animationFile: `${id}.rig`, animationEngine: "olympus-skeletal-2d-v1" } : {}),
+      createdAt: new Date().toISOString(),
+    };
     this.data[collection].push(record);
     await this.persist();
     return structuredClone(record);
@@ -104,14 +110,20 @@ export class DatabaseService implements OnModuleInit {
             ...exercise,
             primaryMuscle: exercise.primary,
             secondaryMuscles: String(exercise.secondary || "").split("·").map((item) => item.trim()).filter(Boolean),
-            image: `/media/exercises/olympus/${String(exercise.id)}.webp`,
+            image: `/media/exercises/olympus/${String(exercise.id)}.webp?v=photos-20260721-v2`,
+            animationFile: `${String(exercise.id)}.rig`,
+            animationEngine: "olympus-skeletal-2d-v1",
           }));
         }
       } catch {
         // Standalone API deployments may not include the shared web catalog.
       }
     }
-    return structuredClone(seed.exercises);
+    return structuredClone(seed.exercises).map((exercise) => ({
+      ...exercise,
+      animationFile: `${String(exercise.id)}.rig`,
+      animationEngine: "olympus-skeletal-2d-v1",
+    }));
   }
 
   private mergeExercises(catalog: Array<Record<string, unknown>>, stored: Array<Record<string, unknown>>) {

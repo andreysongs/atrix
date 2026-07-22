@@ -273,7 +273,7 @@ Uma PWA instalável não é sinônimo de aplicativo totalmente offline. GPS prol
 
 ### Capacitor
 
-`capacitor.config.ts` usa `out/` como `webDir`. O fluxo é:
+`capacitor.config.ts` usa `.next-build/` como `webDir`. O fluxo é:
 
 ```text
 npm run build -> npx cap sync -> Android Studio ou Xcode

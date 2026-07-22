@@ -91,7 +91,7 @@ npm run lint
 npm run build
 ```
 
-O build usa `output: "export"` e gera o artefato estático em `out/`. Por isso, `npm run dev` é a forma recomendada de visualizar localmente durante o desenvolvimento; o diretório `out/` é o artefato consumido por hospedagem estática e pelo Capacitor.
+O build usa `output: "export"` e gera o artefato estático em `.next-build/`. Por isso, `npm run dev` é a forma recomendada de visualizar localmente durante o desenvolvimento; o diretório `.next-build/` é o artefato consumido por hospedagem estática e pelo Capacitor.
 
 ## PWA
 
@@ -110,7 +110,7 @@ Sincronização em segundo plano não deve ser pressuposta, sobretudo no iOS. A 
 
 ## Android e iOS com Capacitor
 
-O arquivo `capacitor.config.ts` aponta `webDir` para `out`, então todo sync nativo começa por um build web.
+O arquivo `capacitor.config.ts` aponta `webDir` para `.next-build`, então todo sync nativo começa por um build web.
 
 Os projetos nativos já estão versionados em `android/` e `ios/`. Para atualizar os dois com o build web mais recente:
 

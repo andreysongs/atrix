@@ -47,6 +47,8 @@ export type CatalogExercise = ExerciseSeed & {
   accent: ExerciseAccent;
   best: string;
   image: string;
+  /** Stable identifier consumed by the procedural skeletal animation engine. */
+  animationFile: string;
   /** Rich catalog contract */
   execution: string[];
   range: string;
@@ -220,7 +222,7 @@ assertSeedFile(seedFile);
 // Keep the revision in the URL whenever the photographic library changes.
 // This bypasses older browser/PWA caches that may still contain the former
 // line-art covers under the same exercise filenames.
-const EXERCISE_IMAGE_REVISION = "photos-20260721-v2";
+const EXERCISE_IMAGE_REVISION = "photos-20260721-v3";
 
 const preparedCatalog = seedFile.exercises.map((seed): CatalogExercise => {
   const rest = restFor(seed);
@@ -230,6 +232,7 @@ const preparedCatalog = seedFile.exercises.map((seed): CatalogExercise => {
     best: seed.best || "Sem registro",
     accent: accentForCategory[seed.category] || "blue",
     image: `/media/exercises/olympus/${seed.id}.webp?v=${EXERCISE_IMAGE_REVISION}`,
+    animationFile: `${seed.id}.rig`,
     execution: buildExecution(seed),
     range: rangeFor(seed),
     breathing: breathingFor(seed),

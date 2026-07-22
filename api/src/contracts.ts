@@ -21,6 +21,7 @@ export class CreateExerciseDto {
   @IsString() category!: string;
   @IsString() equipment!: string;
   @IsString() primaryMuscle!: string;
+  @IsOptional() @IsString() movement?: string;
   @IsOptional() @IsArray() @IsString({ each: true }) secondaryMuscles?: string[];
 }
 

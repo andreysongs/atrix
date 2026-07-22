@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   Activity,
@@ -81,6 +82,13 @@ import { initializePushNotifications } from "@/lib/push-notifications";
 import { listOfflineGuides, removeOfflineGuide, saveOfflineGuide } from "@/lib/offline-content";
 import { ProgramsView, PulseEditorialHero } from "@/components/training-media";
 import { ForgeOnboarding, MobilityView, ProfileView, RunningView, TrainerView, type ForgeOnboardingData } from "@/components/forge-modules";
+
+const loadExerciseMotionPlayer = () => import("@/components/exercise-motion-player").then((module) => module.ExerciseMotionPlayer);
+
+const ExerciseMotionPlayer = dynamic(
+  loadExerciseMotionPlayer,
+  { ssr: false, loading: () => <div className="motion-player-loading" role="status"><span /> Preparando modelo articulado…</div> },
+);
 
 type ViewId = "dashboard" | "programs" | "workouts" | "library" | "progress" | "calendar" | "coach" | "profile" | "running" | "mobility" | "trainer";
 
@@ -819,6 +827,12 @@ function LibraryView({ savedExerciseIds, onAddToNextWorkout, onToast, initialQue
     const focusTimer = window.setTimeout(() => drawerCloseButtonRef.current?.focus(), 0);
     return () => window.clearTimeout(focusTimer);
   }, [selected]);
+  useEffect(() => {
+    if (!selected) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = previousOverflow; };
+  }, [selected]);
   useEffect(() => { void listOfflineGuides().then((items) => setOfflineIds(items.map((item) => item.id))).catch(() => undefined); }, []);
 
   const closeDrawer = () => {
@@ -878,28 +892,34 @@ function LibraryView({ savedExerciseIds, onAddToNextWorkout, onToast, initialQue
         <>
           <section className="exercise-grid" aria-label="Exercícios encontrados">
             {visibleExercises.map((exercise, index) => (
-              <motion.button
+              <motion.article
                 className="card exercise-card"
                 key={exercise.id}
-                onClick={(event) => { selectedTriggerRef.current = event.currentTarget; setSelected(exercise); setDetailTab("technique"); }}
                 variants={fadeUp}
                 initial="hidden"
                 animate="visible"
                 transition={{ delay: Math.min(index, 7) * 0.035 }}
               >
-                <div className={"exercise-visual accent-" + exercise.accent}>
-                  <Image src={exercise.image} alt={`Ilustração de ${exercise.name}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 25vw" />
-                  <span className="exercise-image-shade" aria-hidden="true" />
-                  <span className="favorite">{exercise.favorite ? "★" : "☆"}</span>
-                  <span className="level-pill">{exercise.level}</span>
-                </div>
-                <div className="exercise-copy">
-                  <p className="eyebrow">{exercise.category} · {exercise.equipment}</p>
-                  <h2>{exercise.name}</h2>
-                  <p><strong>{exercise.primary}</strong><small>{exercise.secondary}</small></p>
-                  <span>Melhor marca <strong>{exercise.best}</strong></span><em className="accessibility-chip">{exercise.level === "Avançado" ? "Progressão necessária" : "Adaptável"}</em>
-                </div>
-              </motion.button>
+                <button type="button" className="exercise-card-open" aria-label={`Abrir detalhes de ${exercise.name}`} onClick={(event) => { selectedTriggerRef.current = event.currentTarget; setSelected(exercise); setDetailTab("technique"); }}>
+                  <div className={"exercise-visual accent-" + exercise.accent}>
+                    <Image src={exercise.image} alt={`Fotografia de ${exercise.name}`} fill sizes="(max-width: 640px) 100vw, (max-width: 1100px) 50vw, 25vw" />
+                    <span className="exercise-image-shade" aria-hidden="true" />
+                    <span className="favorite">{exercise.favorite ? "★" : "☆"}</span>
+                    <span className="level-pill">{exercise.level}</span>
+                  </div>
+                  <div className="exercise-copy">
+                    <p className="eyebrow">{exercise.category} · {exercise.equipment}</p>
+                    <h2>{exercise.name}</h2>
+                    <p><strong>{exercise.primary}</strong><small>{exercise.secondary}</small></p>
+                    <span>Melhor marca <strong>{exercise.best}</strong></span><em className="accessibility-chip">{exercise.level === "Avançado" ? "Progressão necessária" : "Adaptável"}</em>
+                  </div>
+                </button>
+                <button type="button" className="exercise-execution-cta" onClick={(event) => { selectedTriggerRef.current = event.currentTarget; setSelected(exercise); setDetailTab("technique"); }}>
+                  <span className="exercise-execution-icon"><Play size={14} fill="currentColor" /></span>
+                  <span><strong>Ver execução</strong><small>Animação articulada em loop</small></span>
+                  <ChevronRight size={16} aria-hidden="true" />
+                </button>
+              </motion.article>
             ))}
           </section>
           {remainingExercises > 0 && <button type="button" className="secondary-button library-load-more" onClick={() => setVisibleCount((count) => Math.min(count + EXERCISES_PER_PAGE, filtered.length))}>Mostrar mais <small>{remainingExercises} restantes</small></button>}
@@ -910,13 +930,21 @@ function LibraryView({ savedExerciseIds, onAddToNextWorkout, onToast, initialQue
       <AnimatePresence>
         {selected && selectedGuide && (
           <motion.div className="drawer-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onMouseDown={closeDrawer}>
-            <motion.aside className="detail-drawer" role="dialog" aria-modal="true" aria-label={"Detalhes de " + selected.name} initial={{ x: "100%" }} animate={{ x: 0 }} exit={{ x: "100%" }} transition={{ type: "spring", damping: 28, stiffness: 280 }} onMouseDown={(event) => event.stopPropagation()} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeDrawer(); return; } trapDialogFocus(event); }}>
-              <button ref={drawerCloseButtonRef} type="button" className="icon-button drawer-close" onClick={closeDrawer} aria-label="Fechar detalhes"><X size={19} /></button>
-              <div className={"detail-hero accent-" + selected.accent}><Image src={selected.image} alt={`Execução ilustrada de ${selected.name}`} fill sizes="(max-width: 640px) 100vw, 500px" /><span className="exercise-image-shade" aria-hidden="true" /></div>
-              <p className="eyebrow">{selected.category} · {selected.equipment}</p><h2>{selected.name}</h2><p className="drawer-description">Movimento acompanhado pelo OLYMPUS AI para técnica, progressão e volume.</p>
-              <div className="detail-context-chips" aria-label="Classificação do exercício">{selectedMetadata.map((item) => <span key={item}>{item}</span>)}</div>
-              <div className="drawer-stat-grid"><div><span>Músculo principal</span><strong>{selected.primary}</strong></div><div><span>Secundários</span><strong>{selected.secondary}</strong></div><div><span>Nível</span><strong>{selected.level}</strong></div><div><span>Seu recorde</span><strong>{selected.best}</strong></div></div>
-              <div className="detail-tabs" role="tablist" aria-label="Conteúdo do exercício">
+            <motion.aside className="detail-drawer exercise-detail-screen" role="dialog" aria-modal="true" aria-labelledby="exercise-detail-title" initial={{ opacity: 0, scale: 0.94, y: 24 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.96, y: 18 }} transition={{ type: "spring", damping: 30, stiffness: 300 }} onMouseDown={(event) => event.stopPropagation()} onKeyDown={(event) => { if (event.key === "Escape") { event.preventDefault(); closeDrawer(); return; } trapDialogFocus(event); }}>
+              <header className="detail-screen-header">
+                <button ref={drawerCloseButtonRef} type="button" className="drawer-back-button" onClick={closeDrawer}><ChevronLeft size={18} /> Voltar</button>
+                <div><p className="eyebrow">{selected.category} · {selected.equipment}</p><h2 id="exercise-detail-title">{selected.name}</h2></div>
+                <span className="detail-level-chip">{selected.level}</span>
+              </header>
+              <div className="detail-screen-body">
+                <section className="detail-motion-column" aria-label="Demonstração visual">
+                  <ExerciseMotionPlayer key={selected.id} exercise={selected} />
+                  <p className="drawer-description">Modelo articulado exclusivo carregado pelo identificador <code>{selected.animationFile}</code>. Use como referência visual e respeite seus limites de mobilidade.</p>
+                  <div className="drawer-stat-grid"><div><span>Músculo principal</span><strong>{selected.primary}</strong></div><div><span>Secundários</span><strong>{selected.secondary}</strong></div><div><span>Nível</span><strong>{selected.level}</strong></div><div><span>Seu recorde</span><strong>{selected.best}</strong></div></div>
+                </section>
+                <section className="detail-guidance-column" aria-label="Orientações do exercício">
+                  <div className="detail-context-chips" aria-label="Classificação do exercício">{selectedMetadata.map((item) => <span key={item}>{item}</span>)}</div>
+                  <div className="detail-tabs" role="tablist" aria-label="Conteúdo do exercício">
                 {([[
                   "technique", "Técnica", "exercise-technique-tab"],
                   ["safety", "Segurança", "exercise-safety-tab"],
@@ -926,8 +954,12 @@ function LibraryView({ savedExerciseIds, onAddToNextWorkout, onToast, initialQue
               {detailTab === "technique" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-technique-tab" className="exercise-detail-panel"><h3>Execução</h3><ol className="execution-steps">{selectedGuide.steps.map((step, index) => <li key={`execution-${index}`}>{step}</li>)}</ol><div className="breathing-note"><Activity size={17} /><span><strong>Respiração</strong><small>{selectedGuide.breathing}</small></span></div><div className="detail-fact-grid" aria-label="Parâmetros de execução"><div><span>Amplitude</span><strong>{selectedGuide.range}</strong></div><div><span>Cadência</span><strong>{selectedGuide.cadence}</strong></div><div><span>Ativação</span><strong>{selectedGuide.activation}</strong></div><div><span>Descanso</span><strong>{selectedGuide.rest}</strong></div></div><DetailCollection title="Cues de execução" items={selectedGuide.cues} /></div>}
               {detailTab === "safety" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-safety-tab" className="exercise-detail-panel"><h3>Segurança e erros comuns</h3><ul className="detail-bullet-list">{selectedGuide.errors.map((error, index) => <li key={`error-${index}`}><X size={15} /> {error}</li>)}</ul><div className="warning-note"><Gauge size={18} /><span><strong>Priorize conforto e técnica</strong><small>{selectedGuide.care.join(" ")}</small></span></div>{selectedGuide.equipmentAlternative.length > 0 && <div className="equipment-note"><Dumbbell size={17} /><span><strong>Alternativas de equipamento</strong><small>{selectedGuide.equipmentAlternative.join(" · ")}</small></span></div>}</div>}
               {detailTab === "progress" && <div id="exercise-detail-panel" role="tabpanel" aria-labelledby="exercise-progress-tab" className="exercise-detail-panel"><h3>Variações e progressão</h3><div className="detail-collection-grid"><DetailCollection title="Variações" items={selectedGuide.variations} /><DetailCollection title="Prescrição" items={selectedGuide.prescriptions} /><DetailCollection title="Exercícios similares" items={selectedGuide.similar} /></div></div>}
-              <button type="button" className="secondary-button full-button" onClick={() => void toggleOffline()}>{offlineIds.includes(selected.id) ? <><Check size={17} /> Disponível offline</> : <><Download size={17} /> Baixar guia offline</>}</button>
-              <button type="button" className="primary-button full-button" onClick={() => onAddToNextWorkout(selected)}>{savedExerciseIds.includes(selected.id) ? <><Check size={17} /> No próximo treino</> : <><Plus size={17} /> Adicionar ao treino</>}</button>
+                  <div className="detail-screen-actions">
+                    <button type="button" className="secondary-button full-button" onClick={() => void toggleOffline()}>{offlineIds.includes(selected.id) ? <><Check size={17} /> Disponível offline</> : <><Download size={17} /> Baixar guia offline</>}</button>
+                    <button type="button" className="primary-button full-button" onClick={() => onAddToNextWorkout(selected)}>{savedExerciseIds.includes(selected.id) ? <><Check size={17} /> No próximo treino</> : <><Plus size={17} /> Adicionar ao treino</>}</button>
+                  </div>
+                </section>
+              </div>
             </motion.aside>
           </motion.div>
         )}
@@ -1425,6 +1457,10 @@ export function PerformanceApp() {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (view === "library") void loadExerciseMotionPlayer();
+  }, [view]);
 
   useEffect(() => {
     const focusSearch = (event: KeyboardEvent) => {
