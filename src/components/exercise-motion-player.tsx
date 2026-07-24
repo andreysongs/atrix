@@ -230,6 +230,7 @@ export function resolveMotion(exercise: MotionExercise): MotionSpec {
     if (latinId === "incline" || /bench|floor|smith|jm-press|supino/.test(latinId)) {
       const isIncline = latinId.includes("inclinado") || latinId.includes("incline");
       const isDecline = latinId.includes("declinado") || latinId.includes("decline");
+      const isFloorPress = latinId.includes("floor");
       const benchPose = isIncline ? rotate(lyingSide, -11, { x: 352, y: 238 }) : isDecline ? rotate(lyingSide, 7, { x: 352, y: 238 }) : lyingSide;
       const lowered = pose(benchPose, {
         elbowL: { x: 357, y: benchPose.elbowL.y + 19 },
@@ -241,10 +242,19 @@ export function resolveMotion(exercise: MotionExercise): MotionSpec {
         ? "Supino inclinado - trajetoria diagonal"
         : isDecline
           ? "Supino declinado - arco inferior"
+          : isFloorPress
+            ? "Supino no chão - amplitude controlada"
           : latinId.includes("fechado") || latinId.includes("close") || latinId.includes("jm")
             ? "Press fechado - enfase em triceps"
             : "Supino horizontal - press guiado";
-      return make(profile, "Mantenha escapulas apoiadas e antebracos alinhados sob a carga.", [benchPose, lowered], 2500, isIncline ? "incline-bench" : "bench", "lateral");
+      return make(
+        profile,
+        "Mantenha escapulas apoiadas e antebracos alinhados sob a carga.",
+        [benchPose, lowered],
+        2500,
+        isFloorPress ? "mat" : isIncline ? "incline-bench" : "bench",
+        "lateral",
+      );
     }
     const extended = pose(standingSide, { elbowL: { x: 414, y: 130 }, elbowR: { x: 426, y: 136 }, wristL: { x: 468, y: 130 }, wristR: { x: 480, y: 136 } });
     const loaded = pose(standingSide, { elbowL: { x: 374, y: 137 }, elbowR: { x: 386, y: 143 }, wristL: { x: 390, y: 122 }, wristR: { x: 401, y: 130 } });

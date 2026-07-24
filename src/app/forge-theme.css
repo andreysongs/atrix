@@ -992,6 +992,13 @@ body {
 .motion-3d-error { z-index: 7; flex-direction: column; padding: 24px; text-align: center; }
 .motion-3d-error strong { color: #f4c45c; font-size: 13px; }
 .motion-3d-error span { max-width: 430px; color: #959da8; line-height: 1.55; }
+.motion-gltf-status { position: absolute; z-index: 5; top: 54px; left: 14px; display: inline-flex; max-width: min(390px, calc(100% - 28px)); align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.09); border-radius: 999px; background: rgba(4,6,8,.78); color: #b6bec9; backdrop-filter: blur(14px); font-size: 8px; font-weight: 750; pointer-events: none; }
+.motion-gltf-status i { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #4f8dca; box-shadow: 0 0 10px currentColor; color: #4f8dca; }
+.motion-gltf-status.is-loading i { animation: olympusLivePulse 1.2s ease-out infinite; }
+.motion-gltf-status.is-active { border-color: rgba(71,183,113,.26); color: #b9d8c4; }
+.motion-gltf-status.is-active i { background: #47b771; color: #47b771; }
+.motion-gltf-status.is-fallback { border-color: rgba(212,167,79,.26); color: #d6c18f; }
+.motion-gltf-status.is-fallback i { background: #d4a74f; color: #d4a74f; }
 .motion-3d-hint { position: absolute; z-index: 4; top: 14px; left: 14px; display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(4,6,8,.7); color: #aeb6c2; backdrop-filter: blur(14px); font-size: 8px; font-weight: 750; pointer-events: none; }
 .motion-3d-hint svg { color: #5fb2ff; }
 .motion-muscle-legend { position: absolute; z-index: 4; top: 14px; right: 14px; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(4,6,8,.72); color: #aeb6c2; backdrop-filter: blur(14px); font-size: 8px; font-weight: 750; pointer-events: none; }
@@ -1074,6 +1081,7 @@ body {
   .motion-view-chip { display: none; }
   .motion-stage { height: 56dvh; min-height: 330px; max-height: 500px; }
   .motion-3d-hint { top: 9px; left: 9px; max-width: calc(100% - 18px); }
+  .motion-gltf-status { top: 49px; left: 9px; max-width: calc(100% - 18px); }
   .motion-muscle-legend { top: auto; right: 9px; bottom: 76px; }
   .motion-stage-label { right: 10px; bottom: 12px; left: 10px; }
   .motion-controls { flex-wrap: wrap; padding: 9px 10px; }
@@ -1088,6 +1096,7 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .motion-live-dot.is-playing::after,
+  .motion-gltf-status.is-loading i,
   .motion-player-loading span { animation: none; }
   .exercise-card,
   .exercise-execution-cta { transition: none; }

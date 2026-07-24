@@ -9,8 +9,16 @@ const supportedMovements = new Set([
 
 const seedFile = JSON.parse(await readFile(resolve("src/data/exercise-seeds.json"), "utf8"));
 if (!Array.isArray(seedFile.exercises) || seedFile.exercises.length === 0) throw new Error("Exercise catalog is empty.");
+const gltfManifest = JSON.parse(await readFile(resolve("src/data/exercise-3d-manifest.json"), "utf8"));
+if (gltfManifest.athleteUrl !== "/3d/athlete/olympus-athlete.glb") {
+  throw new Error("The incremental GLB player must target /3d/athlete/olympus-athlete.glb.");
+}
+const floorPressProfile = gltfManifest.profiles?.["dumbbell-floor-press"];
+if (!floorPressProfile?.clipName) {
+  throw new Error("The GLB manifest must include the dumbbell-floor-press clip profile.");
+}
 const viewerSource = await readFile(resolve("src/components/exercise-human-3d-player.tsx"), "utf8");
-for (const requiredFeature of ["WebGLRenderer", "OrbitControls", "createAthlete", "highlightFor", "setAnimationLoop"]) {
+for (const requiredFeature of ["WebGLRenderer", "OrbitControls", "GLTFLoader", "AnimationMixer", "createAthlete", "highlightFor", "setAnimationLoop"]) {
   if (!viewerSource.includes(requiredFeature)) throw new Error(`3D viewer is missing required feature: ${requiredFeature}`);
 }
 if (/<video|<img|\.gif|\.mp4/i.test(viewerSource)) {
@@ -31,4 +39,4 @@ for (const exercise of seedFile.exercises) {
 }
 
 if (unsupported.size > 0) throw new Error(`Unsupported movement profiles: ${Array.from(unsupported).join(", ")}`);
-process.stdout.write(`3D catalog coverage OK: ${ids.size} exercises, ${animationIds.size} stable motion3d identifiers, ${supportedMovements.size} movement families, WebGL2 human viewer verified.\n`);
+process.stdout.write(`3D catalog coverage OK: ${ids.size} exercises, ${animationIds.size} stable motion3d identifiers, ${supportedMovements.size} movement families, optional GLB athlete route and WebGL2 fallback verified.\n`);

@@ -14,6 +14,7 @@ const config = [
       "node_modules/**",
       "next-env.d.ts",
       ".tools/**",
+      "tmp/**",
       ".edge-*/**",
       "android/**",
       "ios/**",

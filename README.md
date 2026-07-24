@@ -177,6 +177,20 @@ Cada um dos 212 exercícios possui uma capa individual em WebP dentro de `public
 
 ### Execução com atleta humano 3D
 
-Ao abrir **Ver execução 3D**, o app inicializa um modelo humano articulado e procedural em WebGL2 usando Three.js. O personagem é renderizado em tempo real, com movimento contínuo em loop, Play/Pause, velocidade, câmera orbital em 360°, zoom, tela cheia, equipamentos e destaque azul/amarelo para músculos principais e secundários. O motor usa `setAnimationLoop`, resolução adaptativa, pausa de renderização quando o quadro está estático e descarte explícito de recursos gráficos para funcionar na Web e nos WebViews do Android/iOS.
+Ao abrir **Ver execução 3D**, o app inicializa um personagem articulado em WebGL2 usando Three.js. O exercício **Supino no chão com halteres** já usa o atleta oficial OLYMPUS AI em GLB: corpo humano rigado, roupa esportiva, halteres e um clip esquelético próprio em 60 FPS. O arquivo é enquadrado automaticamente e reproduzido em loop pelo `AnimationMixer`, com Play/Pause, velocidade, câmera orbital em 360°, zoom e tela cheia.
 
-Os 212 exercícios possuem identificadores `.motion3d` estáveis, mapeados para perfis de movimento procedurais e validados por `npm run motion:validate`. As fotografias continuam sendo usadas apenas nas capas dos cards; não existem GIFs ou vídeos dentro do visualizador de execução.
+Os 212 exercícios possuem identificadores `.motion3d` estáveis e continuam cobertos pelo motor procedural enquanto cada clip específico do atleta oficial é produzido e validado. O manifesto `src/data/exercise-3d-manifest.json` ativa um GLB somente quando o exercício tem uma animação compatível; se o arquivo ou o clip não existir, o fallback é informado na própria tela. As fotografias continuam sendo usadas apenas nas capas dos cards; não existem GIFs ou vídeos dentro do visualizador de execução.
+
+Valide o pacote 3D real e a cobertura do catálogo com:
+
+```bash
+npm run athlete3d:validate
+npm run motion:validate
+```
+
+A referência visual aprovada está em `design/athlete-3d/`. O atleta publicado
+é derivado do `Sports_Male_04` da biblioteca Microsoft Rocketbox (licença MIT)
+e recebeu texturas, proporções, equipamentos, destaques musculares e animação
+próprios do Olympus AI. O pipeline reprodutível do Blender e a proveniência
+estão documentados em `scripts/3d/README.md` e
+`public/3d/athlete/ASSET-NOTICE.md`.

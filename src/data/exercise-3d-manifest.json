@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "athleteUrl": "/3d/athlete/olympus-athlete.glb",
+  "profiles": {
+    "dumbbell-floor-press": {
+      "clipName": "dumbbell-floor-press",
+      "clipAliases": [
+        "DumbbellFloorPress",
+        "dumbbell_floor_press"
+      ],
+      "modelScale": 1,
+      "modelPosition": [0, 0, 0],
+      "modelRotation": [0, 0, 0],
+      "includesEquipment": true
+    }
+  }
+}

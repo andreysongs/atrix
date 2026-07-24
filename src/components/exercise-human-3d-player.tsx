@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
+import { GLTFLoader, type GLTF } from "three/addons/loaders/GLTFLoader.js";
 import {
   Maximize2,
   Minimize2,
@@ -21,6 +22,7 @@ import {
   type MotionSpec,
   type Pose,
 } from "@/components/exercise-motion-player";
+import rawExercise3DManifest from "@/data/exercise-3d-manifest.json";
 
 type JointVectors = Record<JointName, THREE.Vector3>;
 type HighlightLevel = "primary" | "secondary" | "off";
@@ -41,18 +43,65 @@ type MuscleRegion =
   | "calves";
 
 type AthleteRuntime = {
+  root: THREE.Object3D;
   update: (joints: JointVectors) => void;
 };
 
 type EquipmentRuntime = {
+  root: THREE.Object3D;
   update: (joints: JointVectors) => void;
 };
 
 type ViewerApi = {
   resetCamera: () => void;
+  restartAnimation: () => void;
   rotateCamera: () => void;
+  setPlayback: (active: boolean) => void;
   zoomCamera: (factor: number) => void;
 };
+
+type CameraFit = {
+  far: number;
+  fogFar: number;
+  fogNear: number;
+  maxDistance: number;
+  minDistance: number;
+  near: number;
+  position: THREE.Vector3;
+  radius: number;
+  target: THREE.Vector3;
+};
+
+type Exercise3DProfile = {
+  clipName: string;
+  clipAliases?: string[];
+  motionUrl?: string;
+  modelScale?: number;
+  modelPosition?: number[];
+  modelRotation?: number[];
+  includesEquipment?: boolean;
+};
+
+type Exercise3DManifest = {
+  schemaVersion: number;
+  athleteUrl: string;
+  profiles: Record<string, Exercise3DProfile>;
+};
+
+type GltfRuntime = {
+  action: THREE.AnimationAction;
+  clip: THREE.AnimationClip;
+  mixer: THREE.AnimationMixer;
+  root: THREE.Object3D;
+};
+
+type GltfStatus =
+  | { state: "not-configured"; message: "" }
+  | { state: "loading"; message: string }
+  | { state: "active"; message: string }
+  | { state: "fallback"; message: string };
+
+const exercise3DManifest = rawExercise3DManifest as Exercise3DManifest;
 
 const Y_AXIS = new THREE.Vector3(0, 1, 0);
 const ZERO = new THREE.Vector3();
@@ -78,6 +127,140 @@ const muscleKeywords: Record<MuscleRegion, string[]> = {
 
 function normalizeText(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function normalizeAnimationName(value: string) {
+  return normalizeText(value).replace(/[^a-z0-9]+/g, "");
+}
+
+function profileVector(values: number[] | undefined, fallback: [number, number, number]) {
+  if (!values || values.length !== 3 || values.some((value) => !Number.isFinite(value))) {
+    return new THREE.Vector3(...fallback);
+  }
+  return new THREE.Vector3(values[0], values[1], values[2]);
+}
+
+function hasFiniteBounds(bounds: THREE.Box3) {
+  return !bounds.isEmpty()
+    && bounds.min.toArray().every(Number.isFinite)
+    && bounds.max.toArray().every(Number.isFinite);
+}
+
+function defaultViewDirection(
+  bounds: THREE.Box3,
+  preferredDirection: THREE.Vector3,
+) {
+  const size = bounds.getSize(new THREE.Vector3());
+  const axes = [
+    { length: size.x, vector: new THREE.Vector3(1, 0, 0) },
+    { length: size.y, vector: new THREE.Vector3(0, 1, 0) },
+    { length: size.z, vector: new THREE.Vector3(0, 0, 1) },
+  ].sort((left, right) => right.length - left.length);
+  const longestAxis = axes[0]?.vector || new THREE.Vector3(0, 1, 0);
+  const direction = preferredDirection.lengthSq() > 0.0001
+    ? preferredDirection.clone().normalize()
+    : new THREE.Vector3(0.25, 0.15, 1).normalize();
+
+  // A floor exercise can be exported with the athlete's long axis facing the
+  // fallback camera. Looking almost straight down that axis makes a lying body
+  // appear as a small end-on silhouette. Move to a stable three-quarter view.
+  if (Math.abs(direction.dot(longestAxis)) > 0.72) {
+    const horizontalCandidates = [
+      new THREE.Vector3(1, 0, 0),
+      new THREE.Vector3(0, 0, 1),
+    ].sort(
+      (left, right) => Math.abs(left.dot(longestAxis)) - Math.abs(right.dot(longestAxis)),
+    );
+    const transverse = horizontalCandidates[0] || new THREE.Vector3(1, 0, 0);
+    const longitudinalSign = direction.dot(longestAxis) < 0 ? -1 : 1;
+    direction
+      .copy(transverse)
+      .addScaledVector(longestAxis, -0.38 * longitudinalSign)
+      .addScaledVector(Y_AXIS, 0.32)
+      .normalize();
+  }
+
+  return direction;
+}
+
+function fitPerspectiveCamera(
+  bounds: THREE.Box3,
+  viewDirection: THREE.Vector3,
+  verticalFovDegrees: number,
+  aspect: number,
+  compactViewport: boolean,
+): CameraFit {
+  const target = bounds.getCenter(new THREE.Vector3());
+  const size = bounds.getSize(new THREE.Vector3());
+  const radius = Math.max(0.01, size.length() / 2);
+  const direction = viewDirection.lengthSq() > 0.0001
+    ? viewDirection.clone().normalize()
+    : new THREE.Vector3(0.25, 0.15, 1).normalize();
+  const upReference = Math.abs(direction.dot(Y_AXIS)) > 0.94
+    ? new THREE.Vector3(0, 0, 1)
+    : Y_AXIS;
+  const right = new THREE.Vector3().crossVectors(upReference, direction).normalize();
+  const viewUp = new THREE.Vector3().crossVectors(direction, right).normalize();
+  const verticalTangent = Math.tan(THREE.MathUtils.degToRad(verticalFovDegrees) / 2);
+  const horizontalTangent = verticalTangent * THREE.MathUtils.clamp(aspect, 0.25, 4);
+  const padding = compactViewport ? 1.14 : 1.03;
+  let distance = radius;
+
+  for (const x of [bounds.min.x, bounds.max.x]) {
+    for (const y of [bounds.min.y, bounds.max.y]) {
+      for (const z of [bounds.min.z, bounds.max.z]) {
+        const relative = new THREE.Vector3(x, y, z).sub(target);
+        const depthTowardCamera = relative.dot(direction);
+        distance = Math.max(
+          distance,
+          depthTowardCamera + Math.abs(relative.dot(right)) * padding / horizontalTangent,
+          depthTowardCamera + Math.abs(relative.dot(viewUp)) * padding / verticalTangent,
+        );
+      }
+    }
+  }
+
+  distance = Math.max(radius, distance + radius * 0.025);
+  return {
+    target,
+    position: target.clone().addScaledVector(direction, distance),
+    radius,
+    minDistance: Math.max(0.05, Math.min(distance * 0.52, radius * 0.82)),
+    maxDistance: Math.max(distance * 3.8, radius * 8),
+    near: Math.max(0.01, radius * 0.008),
+    far: Math.max(40, distance + radius * 18),
+    fogNear: distance + radius * 1.05,
+    fogFar: distance + radius * 6.5,
+  };
+}
+
+function collectAnimatedBounds(
+  root: THREE.Object3D,
+  mixer: THREE.AnimationMixer,
+  action: THREE.AnimationAction,
+  clip: THREE.AnimationClip,
+) {
+  const bounds = new THREE.Box3();
+  const sampleCount = clip.duration > 0 ? 16 : 1;
+
+  for (let sample = 0; sample <= sampleCount; sample += 1) {
+    mixer.setTime(clip.duration * sample / sampleCount);
+    root.updateWorldMatrix(true, true);
+    const sampleBounds = new THREE.Box3().setFromObject(root, true);
+    if (hasFiniteBounds(sampleBounds)) bounds.union(sampleBounds);
+  }
+
+  action.reset().play();
+  mixer.setTime(0);
+  root.updateWorldMatrix(true, true);
+  return bounds;
+}
+
+function animationForProfile(gltf: GLTF, profile: Exercise3DProfile) {
+  const acceptedNames = new Set(
+    [profile.clipName, ...(profile.clipAliases || [])].map(normalizeAnimationName),
+  );
+  return gltf.animations.find((clip) => acceptedNames.has(normalizeAnimationName(clip.name)));
 }
 
 function highlightFor(region: MuscleRegion, exercise: MotionExercise): HighlightLevel {
@@ -279,6 +462,7 @@ function createAthlete(scene: THREE.Scene, exercise: MotionExercise): AthleteRun
   addSegmentPatch("calves", "kneeR", "ankleR", 0.082, -0.12);
 
   return {
+    root: athlete,
     update(joints) {
       const basis = bodyBasis(joints);
       segments.forEach(({ mesh, from, to }) => alignBetween(mesh, joints[from], joints[to]));
@@ -479,6 +663,7 @@ function createDynamicEquipment(scene: THREE.Scene, exercise: MotionExercise, sp
   const ankleCable = /cable-(kickback|hip-abduction|lateral-glute-kick|cross-glute-kick)/.test(id);
 
   return {
+    root: group,
     update(joints) {
       const hands = joints.wristL.clone().add(joints.wristR).multiplyScalar(0.5);
       if (bar) {
@@ -537,7 +722,7 @@ function createDynamicEquipment(scene: THREE.Scene, exercise: MotionExercise, sp
   };
 }
 
-function disposeScene(scene: THREE.Scene) {
+function disposeScene(scene: THREE.Object3D) {
   const geometries = new Set<THREE.BufferGeometry>();
   const materials = new Set<THREE.Material>();
   scene.traverse((object) => {
@@ -552,12 +737,14 @@ function disposeScene(scene: THREE.Scene) {
 
 export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise }) {
   const spec = useMemo(() => resolveMotion(exercise), [exercise]);
+  const gltfProfile = exercise3DManifest.profiles[exercise.id] || null;
   const [playing, setPlaying] = useState(false);
   const [speed, setSpeed] = useState<0.5 | 1 | 1.5>(1);
   const [fullscreen, setFullscreen] = useState(false);
   const [expandedFallback, setExpandedFallback] = useState(false);
   const [ready, setReady] = useState(false);
   const [renderError, setRenderError] = useState("");
+  const [gltfStatus, setGltfStatus] = useState<GltfStatus>({ state: "not-configured", message: "" });
   const playerRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -567,7 +754,10 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
   const phaseRef = useRef(0);
   const viewerApiRef = useRef<ViewerApi | null>(null);
 
-  useEffect(() => { playingRef.current = playing; }, [playing]);
+  useEffect(() => {
+    playingRef.current = playing;
+    viewerApiRef.current?.setPlayback(playing);
+  }, [playing]);
   useEffect(() => { speedRef.current = speed; }, [speed]);
 
   useEffect(() => {
@@ -577,12 +767,16 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
     let disposed = false;
     setReady(false);
     setRenderError("");
+    setGltfStatus(gltfProfile
+      ? { state: "loading", message: "Procurando o atleta GLB real e sua animação…" }
+      : { state: "not-configured", message: "" });
     phaseRef.current = 0;
     playingRef.current = false;
     setPlaying(false);
 
     let renderer: THREE.WebGLRenderer | null = null;
     let controls: OrbitControls | null = null;
+    let gltfRuntime: GltfRuntime | null = null;
     let resizeObserver: ResizeObserver | null = null;
     let requestRender = () => undefined;
     const scene = new THREE.Scene();
@@ -594,6 +788,20 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
     const maximumDistance = compactViewport ? 10.2 : 8.4;
     const cameraStart = new THREE.Vector3(spec.view === "frontal" ? 0 : 0.3, 1.55, compactViewport ? 7.45 : 6.1);
     const targetStart = new THREE.Vector3(0, 1.45, 0);
+    const fallbackCameraFit: CameraFit = {
+      position: cameraStart.clone(),
+      target: targetStart.clone(),
+      radius: 2,
+      minDistance: minimumDistance,
+      maxDistance: maximumDistance,
+      near: 0.08,
+      far: 40,
+      fogNear: 6.5,
+      fogFar: 11,
+    };
+    let resetCameraFit = fallbackCameraFit;
+    let realAthleteBounds: THREE.Box3 | null = null;
+    let realAthleteResetDirection: THREE.Vector3 | null = null;
     camera.position.copy(cameraStart);
 
     try {
@@ -607,7 +815,7 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
       renderer = new THREE.WebGLRenderer({ canvas, context, antialias: true, powerPreference: "high-performance" });
       renderer.outputColorSpace = THREE.SRGBColorSpace;
       renderer.toneMapping = THREE.ACESFilmicToneMapping;
-      renderer.toneMappingExposure = 1.08;
+      renderer.toneMappingExposure = 1.2;
       renderer.shadowMap.enabled = true;
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, window.innerWidth < 700 ? 1.45 : 1.8));
@@ -630,8 +838,8 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
       scene.add(rimLight);
 
       createEnvironment(scene, spec, exercise);
-      const athlete = createAthlete(scene, exercise);
-      const equipment = createDynamicEquipment(scene, exercise, spec);
+      const proceduralAthlete = createAthlete(scene, exercise);
+      const proceduralEquipment = createDynamicEquipment(scene, exercise, spec);
       controls = new OrbitControls(camera, canvas);
       controls.target.copy(targetStart);
       controls.enableDamping = true;
@@ -643,24 +851,80 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
       controls.maxPolarAngle = Math.PI * 0.86;
       controls.update();
 
+      const applyCameraFit = (fit: CameraFit) => {
+        camera.position.copy(fit.position);
+        camera.near = fit.near;
+        camera.far = fit.far;
+        camera.updateProjectionMatrix();
+        if (scene.fog instanceof THREE.Fog) {
+          scene.fog.near = fit.fogNear;
+          scene.fog.far = fit.fogFar;
+        }
+        if (controls) {
+          controls.target.copy(fit.target);
+          controls.minDistance = fit.minDistance;
+          controls.maxDistance = fit.maxDistance;
+          controls.update();
+        }
+        requestRender();
+      };
+      const frameRealAthlete = (preserveViewDirection: boolean) => {
+        if (!realAthleteBounds || !realAthleteResetDirection) return;
+        const currentViewDirection = camera.position.clone().sub(controls?.target || targetStart);
+        resetCameraFit = fitPerspectiveCamera(
+          realAthleteBounds,
+          realAthleteResetDirection,
+          camera.fov,
+          camera.aspect,
+          compactViewport,
+        );
+        const fit = preserveViewDirection && currentViewDirection.lengthSq() > 0.0001
+          ? fitPerspectiveCamera(
+            realAthleteBounds,
+            currentViewDirection,
+            camera.fov,
+            camera.aspect,
+            compactViewport,
+          )
+          : resetCameraFit;
+        applyCameraFit(fit);
+      };
       const resetCamera = () => {
-        camera.position.copy(cameraStart);
-        controls?.target.copy(targetStart);
-        controls?.update();
+        applyCameraFit(resetCameraFit);
+      };
+      const restartAnimation = () => {
+        phaseRef.current = 0;
+        if (gltfRuntime) {
+          gltfRuntime.action.reset().play();
+          gltfRuntime.mixer.update(0);
+        }
+        requestRender();
       };
       const rotateCamera = () => {
         const offset = camera.position.clone().sub(controls?.target || targetStart).applyAxisAngle(Y_AXIS, Math.PI / 4);
         camera.position.copy((controls?.target || targetStart).clone().add(offset));
         controls?.update();
       };
+      const setPlayback = (active: boolean) => {
+        playingRef.current = active;
+        if (gltfRuntime) {
+          gltfRuntime.action.paused = !active;
+          if (active) gltfRuntime.action.play();
+        }
+        requestRender();
+      };
       const zoomCamera = (factor: number) => {
         const target = controls?.target || targetStart;
         const offset = camera.position.clone().sub(target);
-        const nextDistance = THREE.MathUtils.clamp(offset.length() * factor, minimumDistance, maximumDistance);
+        const nextDistance = THREE.MathUtils.clamp(
+          offset.length() * factor,
+          controls?.minDistance ?? minimumDistance,
+          controls?.maxDistance ?? maximumDistance,
+        );
         camera.position.copy(target).add(offset.setLength(nextDistance));
         controls?.update();
       };
-      viewerApiRef.current = { resetCamera, rotateCamera, zoomCamera };
+      viewerApiRef.current = { resetCamera, restartAnimation, rotateCamera, setPlayback, zoomCamera };
 
       const resize = () => {
         if (!renderer || disposed) return;
@@ -670,7 +934,8 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
         renderer.setSize(width, height, false);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
-        requestRender();
+        if (realAthleteBounds) frameRealAthlete(true);
+        else requestRender();
       };
       resizeObserver = new ResizeObserver(resize);
       resizeObserver.observe(stage);
@@ -686,23 +951,123 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
         previous = now;
         const controlsChanged = controls?.update() ?? false;
         if (!playingRef.current && !needsRender && !controlsChanged) return;
-        if (playingRef.current) {
-          phaseRef.current = (phaseRef.current + delta * speedRef.current / Math.max(1, spec.duration)) % 1;
+        if (gltfRuntime) {
+          if (playingRef.current) {
+            gltfRuntime.mixer.update(delta / 1000 * speedRef.current);
+          }
+          phaseRef.current = gltfRuntime.clip.duration > 0
+            ? (gltfRuntime.action.time % gltfRuntime.clip.duration) / gltfRuntime.clip.duration
+            : 0;
+        } else {
+          if (playingRef.current) {
+            phaseRef.current = (phaseRef.current + delta * speedRef.current / Math.max(1, spec.duration)) % 1;
+          }
+          const current = interpolatePose(spec.frames, phaseRef.current);
+          const joints = poseTo3D(current, spec.view);
+          proceduralAthlete.update(joints);
+          proceduralEquipment.update(joints);
         }
-        const current = interpolatePose(spec.frames, phaseRef.current);
-        const joints = poseTo3D(current, spec.view);
-        athlete.update(joints);
-        equipment.update(joints);
         if (progressRef.current) progressRef.current.style.transform = `scaleX(${phaseRef.current})`;
         renderer.render(scene, camera);
         needsRender = false;
       });
       const initialJoints = poseTo3D(interpolatePose(spec.frames, 0), spec.view);
-      athlete.update(initialJoints);
-      equipment.update(initialJoints);
+      proceduralAthlete.update(initialJoints);
+      proceduralEquipment.update(initialJoints);
       renderer.render(scene, camera);
       setReady(true);
       void renderer.compileAsync(scene, camera).catch(() => undefined);
+
+      if (gltfProfile) {
+        const loadRealAthlete = async () => {
+          let athleteGltf: GLTF | null = null;
+          let motionGltf: GLTF | null = null;
+          let athleteAdoptedByScene = false;
+          try {
+            const loader = new GLTFLoader();
+            if (gltfProfile.motionUrl) {
+              [athleteGltf, motionGltf] = await Promise.all([
+                loader.loadAsync(exercise3DManifest.athleteUrl),
+                loader.loadAsync(gltfProfile.motionUrl),
+              ]);
+            } else {
+              athleteGltf = await loader.loadAsync(exercise3DManifest.athleteUrl);
+              motionGltf = athleteGltf;
+            }
+
+            if (disposed) return;
+            const clip = animationForProfile(motionGltf, gltfProfile);
+            if (!clip) {
+              throw new Error(`Clip "${gltfProfile.clipName}" não encontrado no pacote GLB.`);
+            }
+
+            const realAthlete = athleteGltf.scene;
+            const modelPosition = profileVector(gltfProfile.modelPosition, [0, 0, 0]);
+            const modelRotation = profileVector(gltfProfile.modelRotation, [0, 0, 0]);
+            realAthlete.name = "olympus-real-athlete-glb";
+            realAthlete.position.copy(modelPosition);
+            realAthlete.rotation.set(modelRotation.x, modelRotation.y, modelRotation.z);
+            realAthlete.scale.setScalar(
+              Number.isFinite(gltfProfile.modelScale) ? Math.max(0.001, gltfProfile.modelScale || 1) : 1,
+            );
+            realAthlete.traverse((object) => {
+              if (!(object instanceof THREE.Mesh)) return;
+              object.castShadow = true;
+              object.receiveShadow = true;
+            });
+
+            const mixer = new THREE.AnimationMixer(realAthlete);
+            const action = mixer.clipAction(clip);
+            action.setLoop(THREE.LoopRepeat, Infinity);
+            action.clampWhenFinished = false;
+            action.reset().play();
+            mixer.update(0);
+            const animatedBounds = collectAnimatedBounds(realAthlete, mixer, action, clip);
+            if (!hasFiniteBounds(animatedBounds)) {
+              throw new Error("O atleta GLB não possui limites visuais válidos para enquadramento.");
+            }
+
+            scene.add(realAthlete);
+            athleteAdoptedByScene = true;
+            proceduralAthlete.root.visible = false;
+            proceduralEquipment.root.visible = !gltfProfile.includesEquipment;
+            gltfRuntime = { action, clip, mixer, root: realAthlete };
+            realAthleteBounds = animatedBounds;
+            realAthleteResetDirection = defaultViewDirection(
+              animatedBounds,
+              cameraStart.clone().sub(targetStart),
+            );
+            frameRealAthlete(false);
+            phaseRef.current = 0;
+            setGltfStatus({
+              state: "active",
+              message: `Atleta GLB real · clip ${clip.name}`,
+            });
+            requestRender();
+            if (renderer) void renderer.compileAsync(scene, camera).catch(() => undefined);
+          } catch (error) {
+            if (!disposed) {
+              const detail = error instanceof Error ? error.message : "arquivo ou clip indisponível";
+              console.info(`[OLYMPUS 3D] ${detail}`);
+              proceduralAthlete.root.visible = true;
+              proceduralEquipment.root.visible = true;
+              realAthleteBounds = null;
+              realAthleteResetDirection = null;
+              resetCameraFit = fallbackCameraFit;
+              applyCameraFit(fallbackCameraFit);
+              setGltfStatus({
+                state: "fallback",
+                message: "Ativo GLB real ainda não instalado · exibindo fallback 3D",
+              });
+              requestRender();
+            }
+          } finally {
+            if (!athleteAdoptedByScene && athleteGltf) disposeScene(athleteGltf.scene);
+            if (motionGltf && motionGltf !== athleteGltf) disposeScene(motionGltf.scene);
+          }
+        };
+        void loadRealAthlete();
+      }
     } catch (error) {
       setRenderError(error instanceof Error ? error.message : "Não foi possível inicializar o modelo humano 3D.");
     }
@@ -725,12 +1090,16 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
       resizeObserver?.disconnect();
       controls?.removeEventListener("change", requestRender);
       controls?.dispose();
+      if (gltfRuntime) {
+        gltfRuntime.mixer.stopAllAction();
+        gltfRuntime.mixer.uncacheRoot(gltfRuntime.root);
+      }
       renderer?.setAnimationLoop(null);
       disposeScene(scene);
       renderer?.renderLists.dispose();
       renderer?.dispose();
     };
-  }, [exercise, spec]);
+  }, [exercise, gltfProfile, spec]);
 
   useEffect(() => {
     const onFullscreenChange = () => setFullscreen(document.fullscreenElement === playerRef.current);
@@ -739,7 +1108,7 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
   }, []);
 
   const restart = () => {
-    phaseRef.current = 0;
+    viewerApiRef.current?.restartAnimation();
     setPlaying(true);
   };
   const toggleFullscreen = async () => {
@@ -761,13 +1130,19 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
   return (
     <section ref={playerRef} className={`exercise-motion-player exercise-human-3d${fullscreen || expandedFallback ? " is-expanded" : ""}`} aria-label={`Modelo humano 3D executando ${exercise.name}`}>
       <header className="motion-player-heading">
-        <div><span className={playing ? "motion-live-dot is-playing" : "motion-live-dot"} aria-hidden="true" /><p><strong>MODELO HUMANO 3D</strong><small>{spec.profile}</small></p></div>
+        <div><span className={playing ? "motion-live-dot is-playing" : "motion-live-dot"} aria-hidden="true" /><p><strong>{gltfStatus.state === "active" ? "ATLETA GLB REAL" : "MODELO HUMANO 3D"}</strong><small>{gltfStatus.state === "active" ? gltfStatus.message : spec.profile}</small></p></div>
         <span className="motion-view-chip">3D · 360°</span>
       </header>
       <div ref={stageRef} className="motion-stage motion-stage-3d">
         <canvas ref={canvasRef} role="img" aria-label={`${exercise.name}: modelo humano 3D interativo. Arraste para girar e use pinça ou rolagem para zoom.`} onDoubleClick={() => viewerApiRef.current?.resetCamera()} />
         {!ready && !renderError && <div className="motion-3d-loading" role="status"><span /> Preparando atleta 3D…</div>}
         {renderError && <div className="motion-3d-error" role="alert"><strong>Visualização 3D indisponível</strong><span>{renderError}</span></div>}
+        {ready && gltfStatus.state !== "not-configured" && (
+          <div className={`motion-gltf-status is-${gltfStatus.state}`} role="status">
+            <i aria-hidden="true" />
+            {gltfStatus.message}
+          </div>
+        )}
         <div className="motion-3d-hint"><Rotate3D size={14} /> Arraste para girar · pinça/scroll para zoom</div>
         <div className="motion-muscle-legend" aria-label="Legenda de ativação muscular"><span><i className="primary" /> Principal</span><span><i className="secondary" /> Secundário</span></div>
         <div className="motion-stage-label"><span>{exercise.primary}</span><strong>{spec.coachingCue}</strong></div>
@@ -785,7 +1160,7 @@ export function ExerciseMotionPlayer({ exercise }: { exercise: MotionExercise })
         <button type="button" onClick={() => viewerApiRef.current?.resetCamera()} aria-label="Restaurar câmera" title="Restaurar câmera"><RotateCcw size={17} /></button>
         <button type="button" onClick={() => void toggleFullscreen()} aria-label={fullscreen || expandedFallback ? "Sair da tela cheia" : "Abrir em tela cheia"} title="Tela cheia">{fullscreen || expandedFallback ? <Minimize2 size={17} /> : <Maximize2 size={17} />}</button>
       </div>
-      <footer className="motion-player-footer"><span><i /> Atleta anatômico · WebGL2</span><code>{exercise.animationFile}</code></footer>
+      <footer className="motion-player-footer"><span><i /> {gltfStatus.state === "active" ? "GLB real · AnimationMixer" : gltfStatus.state === "fallback" ? "Fallback procedural · WebGL2" : "Atleta anatômico · WebGL2"}</span><code>{gltfProfile?.clipName || exercise.animationFile}</code></footer>
       <span className="sr-only" aria-live="polite">{playing ? `Animação 3D em reprodução a ${speed} vezes a velocidade normal.` : "Animação 3D pausada. Pressione Play para iniciar."}</span>
     </section>
   );
