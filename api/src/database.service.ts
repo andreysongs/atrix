@@ -87,7 +87,7 @@ export class DatabaseService implements OnModuleInit {
     const record = {
       id,
       ...input,
-      ...(collection === "exercises" ? { animationFile: `${id}.rig`, animationEngine: "olympus-skeletal-2d-v1" } : {}),
+      ...(collection === "exercises" ? { animationFile: `${id}.motion3d`, animationEngine: "olympus-human-webgl2-v1" } : {}),
       createdAt: new Date().toISOString(),
     };
     this.data[collection].push(record);
@@ -110,9 +110,9 @@ export class DatabaseService implements OnModuleInit {
             ...exercise,
             primaryMuscle: exercise.primary,
             secondaryMuscles: String(exercise.secondary || "").split("·").map((item) => item.trim()).filter(Boolean),
-            image: `/media/exercises/olympus/${String(exercise.id)}.webp?v=photos-20260721-v2`,
-            animationFile: `${String(exercise.id)}.rig`,
-            animationEngine: "olympus-skeletal-2d-v1",
+            image: `/media/exercises/olympus/${String(exercise.id)}.webp?v=photos-20260721-v3`,
+            animationFile: `${String(exercise.id)}.motion3d`,
+            animationEngine: "olympus-human-webgl2-v1",
           }));
         }
       } catch {
@@ -121,8 +121,8 @@ export class DatabaseService implements OnModuleInit {
     }
     return structuredClone(seed.exercises).map((exercise) => ({
       ...exercise,
-      animationFile: `${String(exercise.id)}.rig`,
-      animationEngine: "olympus-skeletal-2d-v1",
+      animationFile: `${String(exercise.id)}.motion3d`,
+      animationEngine: "olympus-human-webgl2-v1",
     }));
   }
 

@@ -891,7 +891,7 @@ body {
 
 .drawer-backdrop {
   display: grid;
-  padding: 4dvh 4vw;
+  padding: 0;
   place-items: center;
   overflow: hidden;
 }
@@ -900,13 +900,13 @@ body {
   top: auto;
   right: auto;
   display: grid;
-  width: min(92vw, 1440px);
-  height: min(92dvh, 920px);
+  width: 100vw;
+  height: 100dvh;
   grid-template-rows: auto minmax(0, 1fr);
   overflow: hidden;
   padding: 0;
-  border: 1px solid rgba(201, 154, 61, .22);
-  border-radius: 24px;
+  border: 0;
+  border-radius: 0;
   background: var(--surface);
   box-shadow: 0 34px 120px rgba(0, 0, 0, .38), 0 0 0 1px rgba(255, 255, 255, .04);
 }
@@ -928,10 +928,10 @@ body {
 .drawer-back-button { display: inline-flex; min-height: 42px; align-items: center; gap: 6px; padding: 0 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-soft); color: var(--text-secondary); font-size: 10px; font-weight: 800; }
 .drawer-back-button:hover { border-color: rgba(201, 154, 61, .34); color: #a87318; }
 .detail-level-chip { padding: 7px 10px; border: 1px solid rgba(201, 154, 61, .24); border-radius: 999px; background: rgba(201, 154, 61, .1); color: #9b6b19; font-size: 8px; font-weight: 850; letter-spacing: .08em; text-transform: uppercase; }
-.detail-screen-body { display: grid; min-height: 0; grid-template-columns: minmax(0, 1.45fr) minmax(350px, .85fr); overflow: hidden; }
+.detail-screen-body { display: grid; min-height: 0; grid-template-columns: minmax(0, 1.8fr) minmax(340px, .72fr); overflow: hidden; }
 .detail-motion-column,
 .detail-guidance-column { min-width: 0; min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
-.detail-motion-column { padding: 22px; background: radial-gradient(circle at 50% 10%, rgba(201, 154, 61, .1), transparent 44%), #070707; color: #f8fafc; }
+.detail-motion-column { padding: 16px; background: radial-gradient(circle at 50% 10%, rgba(25, 132, 255, .1), transparent 42%), radial-gradient(circle at 70% 16%, rgba(201, 154, 61, .08), transparent 38%), #070707; color: #f8fafc; }
 .detail-guidance-column { display: flex; flex-direction: column; padding: 22px 24px max(24px, env(safe-area-inset-bottom)); border-left: 1px solid var(--border); background: var(--surface); }
 .detail-motion-column .drawer-description { margin: 15px 2px 0; color: #9ba3af; }
 .detail-motion-column .drawer-description code { color: #d5ac59; font-family: inherit; font-size: .9em; font-weight: 750; }
@@ -983,6 +983,22 @@ body {
 .motion-view-chip { flex: 0 0 auto; padding: 5px 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; color: #7f8793; font-size: 7px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
 .motion-stage { position: relative; height: clamp(360px, 50vh, 560px); overflow: hidden; background: radial-gradient(circle at 50% 42%, rgba(202,157,67,.24), transparent 34%), linear-gradient(180deg, #0b0a07, #040404 62%); }
 .motion-stage > svg { display: block; width: 100%; height: 100%; }
+.motion-stage-3d { min-height: 460px; isolation: isolate; background: #050607; }
+.motion-stage-3d > canvas { display: block; width: 100%; height: 100%; outline: 0; cursor: grab; touch-action: none; user-select: none; }
+.motion-stage-3d > canvas:active { cursor: grabbing; }
+.motion-3d-loading,
+.motion-3d-error { position: absolute; z-index: 6; inset: 0; display: flex; align-items: center; justify-content: center; gap: 10px; background: radial-gradient(circle at 50% 45%, rgba(18,98,185,.14), transparent 34%), #050607; color: #aab2bd; font-size: 10px; font-weight: 750; }
+.motion-3d-loading span { width: 19px; height: 19px; border: 2px solid rgba(22,141,255,.2); border-top-color: #168dff; border-radius: 50%; animation: olympusRigSpin .75s linear infinite; }
+.motion-3d-error { z-index: 7; flex-direction: column; padding: 24px; text-align: center; }
+.motion-3d-error strong { color: #f4c45c; font-size: 13px; }
+.motion-3d-error span { max-width: 430px; color: #959da8; line-height: 1.55; }
+.motion-3d-hint { position: absolute; z-index: 4; top: 14px; left: 14px; display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(4,6,8,.7); color: #aeb6c2; backdrop-filter: blur(14px); font-size: 8px; font-weight: 750; pointer-events: none; }
+.motion-3d-hint svg { color: #5fb2ff; }
+.motion-muscle-legend { position: absolute; z-index: 4; top: 14px; right: 14px; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(4,6,8,.72); color: #aeb6c2; backdrop-filter: blur(14px); font-size: 8px; font-weight: 750; pointer-events: none; }
+.motion-muscle-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.motion-muscle-legend i { width: 7px; height: 7px; border-radius: 50%; box-shadow: 0 0 9px currentColor; }
+.motion-muscle-legend i.primary { background: #168dff; color: #168dff; }
+.motion-muscle-legend i.secondary { background: #f0ba35; color: #f0ba35; }
 .motion-grid path { fill: none; stroke: rgba(226,182,91,.055); stroke-width: 1; }
 .motion-floor-line { stroke: rgba(219,181,98,.3); stroke-width: 2; }
 .motion-mat { fill: rgba(201,154,61,.12); stroke: rgba(201,154,61,.32); }
@@ -1009,7 +1025,7 @@ body {
 .motion-stage-label span { color: #d7af5b; font-size: 7px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
 .motion-stage-label strong { color: #d8dbe0; font-size: 9px; font-weight: 650; line-height: 1.4; }
 .motion-progress { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; background: rgba(255,255,255,.07); }
-.motion-progress i { display: block; height: 100%; background: linear-gradient(90deg, #9b6514, #ebc86f); box-shadow: 0 0 10px rgba(218,173,79,.42); }
+.motion-progress i { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, #168dff, #69c0ff, #ebc86f); box-shadow: 0 0 10px rgba(40,145,255,.52); transform: scaleX(0); transform-origin: left center; }
 .motion-controls { display: flex; min-height: 66px; align-items: center; gap: 7px; padding: 10px 13px; border-top: 1px solid rgba(255,255,255,.07); background: #0b0b0b; }
 .motion-controls > button,
 .motion-speed-control button { display: grid; min-width: 42px; height: 42px; place-items: center; border: 1px solid rgba(255,255,255,.09); border-radius: 12px; background: rgba(255,255,255,.035); color: #9ba2ad; font-size: 8px; font-weight: 850; transition: border-color 140ms var(--ease), color 140ms var(--ease), background 140ms var(--ease); }
@@ -1034,13 +1050,13 @@ body {
 :root[data-theme="dark"] .detail-level-chip { color: #e1b65a; }
 
 @media (max-width: 980px) {
-  .drawer-backdrop { padding: 2dvh 2vw; }
-  .detail-drawer.exercise-detail-screen { width: 96vw; height: 96dvh; }
+  .drawer-backdrop { padding: 0; }
+  .detail-drawer.exercise-detail-screen { width: 100vw; height: 100dvh; }
   .detail-screen-body { display: block; overflow-y: auto; }
   .detail-motion-column,
   .detail-guidance-column { overflow: visible; }
   .detail-guidance-column { border-top: 1px solid var(--border); border-left: 0; }
-  .motion-stage { height: min(54vw, 480px); min-height: 330px; }
+  .motion-stage { height: min(58vw, 520px); min-height: 390px; }
 }
 
 @media (max-width: 640px) {
@@ -1056,7 +1072,9 @@ body {
   .detail-guidance-column { padding: 16px 14px max(18px, env(safe-area-inset-bottom)); }
   .motion-player-heading { min-height: 56px; padding: 9px 11px; }
   .motion-view-chip { display: none; }
-  .motion-stage { height: 53dvh; min-height: 300px; max-height: 430px; }
+  .motion-stage { height: 56dvh; min-height: 330px; max-height: 500px; }
+  .motion-3d-hint { top: 9px; left: 9px; max-width: calc(100% - 18px); }
+  .motion-muscle-legend { top: auto; right: 9px; bottom: 76px; }
   .motion-stage-label { right: 10px; bottom: 12px; left: 10px; }
   .motion-controls { flex-wrap: wrap; padding: 9px 10px; }
   .motion-controls > button,

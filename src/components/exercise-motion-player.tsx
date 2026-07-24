@@ -13,13 +13,13 @@ import {
 } from "lucide-react";
 import type { CatalogExercise } from "@/lib/exercise-catalog";
 
-type MotionExercise = Pick<
+export type MotionExercise = Pick<
   CatalogExercise,
-  "id" | "name" | "category" | "equipment" | "movement" | "primary" | "animationFile"
+  "id" | "name" | "category" | "equipment" | "movement" | "primary" | "secondary" | "animationFile"
 >;
 
-type Point = { x: number; y: number };
-type JointName =
+export type Point = { x: number; y: number };
+export type JointName =
   | "head"
   | "neck"
   | "shoulderL"
@@ -34,7 +34,7 @@ type JointName =
   | "kneeR"
   | "ankleL"
   | "ankleR";
-type Pose = Record<JointName, Point>;
+export type Pose = Record<JointName, Point>;
 
 type SceneKind =
   | "floor"
@@ -49,7 +49,7 @@ type SceneKind =
   | "step"
   | "pole";
 
-type MotionSpec = {
+export type MotionSpec = {
   profile: string;
   coachingCue: string;
   frames: Pose[];
@@ -163,7 +163,7 @@ function rotate(base: Pose, degrees: number, center: Point = { x: 320, y: 190 })
   })) as Pose;
 }
 
-function interpolatePose(frames: Pose[], phase: number): Pose {
+export function interpolatePose(frames: Pose[], phase: number): Pose {
   const validFrames = frames.filter((frame): frame is Pose => Boolean(frame));
   if (validFrames.length === 0) return standingFront;
   const normalizedPhase = Number.isFinite(phase) ? ((phase % 1) + 1) % 1 : 0;
@@ -184,7 +184,7 @@ function deterministicDuration(id: string, base: number) {
   return Math.round(base * (0.97 + (Math.abs(hash) % 7) / 100));
 }
 
-function resolveMotion(exercise: MotionExercise): MotionSpec {
+export function resolveMotion(exercise: MotionExercise): MotionSpec {
   const id = exercise.id.toLowerCase();
   const latinId = id.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
   const movement = exercise.movement.toLowerCase();
@@ -227,7 +227,7 @@ function resolveMotion(exercise: MotionExercise): MotionSpec {
       const lowered = pose(plankSide, { head: { x: 469, y: 192 }, neck: { x: 441, y: 203 }, shoulderL: { x: 409, y: 209 }, shoulderR: { x: 417, y: 217 }, elbowL: { x: 371, y: 221 }, elbowR: { x: 382, y: 229 }, hipL: { x: 321, y: 207 }, hipR: { x: 329, y: 215 }, kneeL: { x: 246, y: 211 }, kneeR: { x: 253, y: 219 } });
       return make(id.includes("diamond") ? "Flexão diamante — base estreita" : id.includes("decline") || id.includes("feet") ? "Flexão declinada — pés elevados" : id.includes("incline") ? "Flexão inclinada — apoio elevado" : id.includes("explosive") ? "Flexão explosiva — aceleração controlada" : "Flexão — cadeia corporal rígida", "Desça em bloco, cotovelos controlados e mãos firmes no apoio.", [plankSide, lowered], id.includes("explosive") ? 1750 : 2400, id.includes("incline") || id.includes("decline") || id.includes("feet") ? "step" : "floor", "lateral");
     }
-    if (/bench|floor|smith|jm-press|supino/.test(latinId)) {
+    if (latinId === "incline" || /bench|floor|smith|jm-press|supino/.test(latinId)) {
       const isIncline = latinId.includes("inclinado") || latinId.includes("incline");
       const isDecline = latinId.includes("declinado") || latinId.includes("decline");
       const benchPose = isIncline ? rotate(lyingSide, -11, { x: 352, y: 238 }) : isDecline ? rotate(lyingSide, 7, { x: 352, y: 238 }) : lyingSide;
@@ -337,6 +337,64 @@ function resolveMotion(exercise: MotionExercise): MotionSpec {
       const flexed = pose(base, { wristL: { x: 436, y: 187 }, wristR: { x: 446, y: 194 } });
       return make("Flexão de punho — alavanca curta", "Mova apenas os punhos, mantendo antebraços apoiados.", [base, flexed], 2200, "bench", "lateral");
     }
+    if (id.includes("preacher")) {
+      const supported = pose(seatedSide, {
+        shoulderL: { x: 345, y: 108 }, shoulderR: { x: 358, y: 108 },
+        elbowL: { x: 386, y: 166 }, elbowR: { x: 398, y: 172 },
+        wristL: { x: 425, y: 211 }, wristR: { x: 437, y: 217 },
+      });
+      const curled = pose(supported, {
+        wristL: { x: 374, y: 121 }, wristR: { x: 386, y: 127 },
+      });
+      return make("Rosca Scott — braços apoiados à frente", "Mantenha os braços inteiros no apoio e flexione os cotovelos sem levantar os ombros.", [supported, curled], 2700, equipment.includes("máquina") ? "machine" : "bench", "lateral");
+    }
+    if (id.includes("incline")) {
+      const stretched = pose(seatedSide, {
+        head: { x: 339, y: 65 }, neck: { x: 334, y: 95 },
+        shoulderL: { x: 329, y: 111 }, shoulderR: { x: 342, y: 111 },
+        elbowL: { x: 317, y: 160 }, elbowR: { x: 330, y: 160 },
+        wristL: { x: 319, y: 210 }, wristR: { x: 332, y: 210 },
+      });
+      const curled = pose(stretched, {
+        wristL: { x: 353, y: 127 }, wristR: { x: 366, y: 127 },
+      });
+      return make("Rosca inclinada — ombros em extensão", "Mantenha os braços atrás da linha do tronco e flexione sem trazer os cotovelos para a frente.", [stretched, curled], 2850, "incline-bench", "lateral");
+    }
+    if (id.includes("concentration")) {
+      const supported = pose(seatedSide, {
+        head: { x: 414, y: 126 }, neck: { x: 390, y: 145 },
+        shoulderL: { x: 364, y: 158 }, shoulderR: { x: 374, y: 165 },
+        elbowL: { x: 389, y: 224 }, elbowR: { x: 405, y: 214 },
+        wristL: { x: 399, y: 278 }, wristR: { x: 421, y: 238 },
+      });
+      const curled = pose(supported, {
+        wristL: { x: 428, y: 181 },
+      });
+      return make("Rosca concentração — cotovelo apoiado na coxa", "Fixe o cotovelo na face interna da coxa e mova somente o antebraço.", [supported, curled], 2750, "bench", "lateral");
+    }
+    if (id.includes("spider")) {
+      const hanging = pose(standingSide, {
+        head: { x: 421, y: 130 }, neck: { x: 395, y: 146 },
+        shoulderL: { x: 366, y: 159 }, shoulderR: { x: 376, y: 166 },
+        elbowL: { x: 371, y: 207 }, elbowR: { x: 382, y: 214 },
+        wristL: { x: 374, y: 257 }, wristR: { x: 385, y: 264 },
+        hipL: { x: 319, y: 198 }, hipR: { x: 334, y: 203 },
+      });
+      const curled = pose(hanging, {
+        wristL: { x: 412, y: 173 }, wristR: { x: 423, y: 180 },
+      });
+      return make("Rosca spider — peito apoiado e braços verticais", "Mantenha o peito no banco e os braços apontados ao solo enquanto flexiona os cotovelos.", [hanging, curled], 2750, "incline-bench", "lateral");
+    }
+    if (id.includes("bayesian")) {
+      const stretched = pose(standingSide, {
+        elbowL: { x: 315, y: 151 }, elbowR: { x: 327, y: 156 },
+        wristL: { x: 279, y: 184 }, wristR: { x: 291, y: 190 },
+      });
+      const curled = pose(stretched, {
+        wristL: { x: 339, y: 111 }, wristR: { x: 351, y: 117 },
+      });
+      return make("Rosca Bayesian — braço atrás do tronco", "Afaste-se da polia, mantenha o braço em extensão de ombro e flexione sem avançar o cotovelo.", [stretched, curled], 2800, "cable-low", "lateral");
+    }
     const start = standingFront;
     const both = pose(start, { elbowL: { x: 278, y: 145 }, elbowR: { x: 362, y: 145 }, wristL: { x: 294, y: 106 }, wristR: { x: 346, y: 106 } });
     if (id.includes("alternating")) {
@@ -344,7 +402,7 @@ function resolveMotion(exercise: MotionExercise): MotionSpec {
       const right = pose(start, { wristR: { x: 346, y: 106 } });
       return make("Rosca alternada — controle unilateral", "Mantenha cotovelos junto ao tronco e alterne sem inclinar o corpo.", [start, left, start, right], 3900, "floor", "frontal");
     }
-    return make(id.includes("hammer") ? "Rosca martelo — pegada neutra" : id.includes("preacher") ? "Rosca Scott — braço apoiado" : id.includes("incline") || id.includes("bayesian") ? "Rosca em alongamento de ombro" : "Rosca de cotovelo — flexão controlada", "Flexione os cotovelos sem deslocar os ombros para a frente.", [start, both], 2450, /preacher|incline|concentration|spider|machine/.test(id) ? "bench" : equipment.includes("polia") ? "cable-low" : "floor", "frontal");
+    return make(id.includes("hammer") ? "Rosca martelo — pegada neutra" : id.includes("zottman") ? "Rosca Zottman — supinação na subida e pronação na descida" : id.includes("reverse") ? "Rosca inversa — pegada pronada" : "Rosca de cotovelo — flexão controlada", "Flexione os cotovelos sem deslocar os ombros para a frente.", [start, both], 2450, equipment.includes("máquina") ? "machine" : equipment.includes("polia") ? "cable-low" : "floor", "frontal");
   }
 
   if (movement === "extension") {
@@ -375,24 +433,316 @@ function resolveMotion(exercise: MotionExercise): MotionSpec {
 
   if (movement === "squat") {
     if (id === "leg-press") {
-      const loaded = pose(seatedSide, { hipL: { x: 326, y: 210 }, hipR: { x: 341, y: 210 }, kneeL: { x: 404, y: 230 }, kneeR: { x: 414, y: 240 }, ankleL: { x: 448, y: 168 }, ankleR: { x: 459, y: 178 } });
+      const reclined = rotate(seatedSide, -25, { x: 334, y: 205 });
+      const loaded = pose(seatedSide, {
+        head: reclined.head, neck: reclined.neck,
+        shoulderL: reclined.shoulderL, shoulderR: reclined.shoulderR,
+        elbowL: reclined.elbowL, elbowR: reclined.elbowR,
+        wristL: reclined.wristL, wristR: reclined.wristR,
+        hipL: { x: 326, y: 210 }, hipR: { x: 341, y: 210 },
+        kneeL: { x: 404, y: 230 }, kneeR: { x: 414, y: 240 },
+        ankleL: { x: 448, y: 168 }, ankleR: { x: 459, y: 178 },
+      });
       const extended = pose(loaded, { kneeL: { x: 438, y: 190 }, kneeR: { x: 448, y: 200 }, ankleL: { x: 505, y: 142 }, ankleR: { x: 516, y: 152 } });
       return make("Leg press — extensão guiada de pernas", "Pressione a plataforma sem bloquear os joelhos ou perder a pelve no encosto.", [loaded, extended], 3000, "machine", "lateral");
     }
-    const bottom = pose(standingFront, { head: { x: 320, y: 112 }, neck: { x: 320, y: 139 }, shoulderL: { x: 286, y: 149 }, shoulderR: { x: 354, y: 149 }, elbowL: { x: 278, y: 179 }, elbowR: { x: 362, y: 179 }, wristL: { x: 296, y: 153 }, wristR: { x: 344, y: 153 }, hipL: { x: 300, y: 232 }, hipR: { x: 340, y: 232 }, kneeL: { x: 268, y: 262 }, kneeR: { x: 372, y: 262 } });
-    return make(id.includes("front") ? "Agachamento frontal — tronco vertical" : id.includes("sumo") ? "Agachamento sumô — base ampla" : id.includes("sissy") ? "Sissy squat — dominância de joelho" : id.includes("hack") || id.includes("pendulum") ? "Agachamento guiado — trilho de máquina" : "Agachamento — flexão coordenada de quadril e joelho", "Joelhos acompanham os pés; mantenha pressão uniforme e coluna estável.", [standingFront, bottom], 3000, equipment.includes("máquina") ? "machine" : "floor", "frontal");
+    if (id.includes("front-squat")) {
+      const racked = pose(standingFront, {
+        elbowL: { x: 274, y: 103 }, elbowR: { x: 366, y: 103 },
+        wristL: { x: 302, y: 91 }, wristR: { x: 338, y: 91 },
+      });
+      const bottom = pose(racked, {
+        head: { x: 320, y: 105 }, neck: { x: 320, y: 134 },
+        shoulderL: { x: 286, y: 146 }, shoulderR: { x: 354, y: 146 },
+        elbowL: { x: 270, y: 151 }, elbowR: { x: 370, y: 151 },
+        wristL: { x: 301, y: 139 }, wristR: { x: 339, y: 139 },
+        hipL: { x: 302, y: 230 }, hipR: { x: 338, y: 230 },
+        kneeL: { x: 279, y: 266 }, kneeR: { x: 361, y: 266 },
+        ankleL: { x: 287, y: 320 }, ankleR: { x: 353, y: 320 },
+      });
+      return make("Agachamento frontal — barra no rack anterior", "Mantenha cotovelos altos e tronco vertical enquanto os joelhos avançam alinhados aos pés.", [racked, bottom], 3050, "floor", "frontal");
+    }
+    if (id.includes("sumo-squat")) {
+      const wide = pose(standingFront, {
+        elbowL: { x: 298, y: 157 }, elbowR: { x: 342, y: 157 },
+        wristL: { x: 312, y: 207 }, wristR: { x: 328, y: 207 },
+        hipL: { x: 296, y: 190 }, hipR: { x: 344, y: 190 },
+        kneeL: { x: 273, y: 253 }, kneeR: { x: 367, y: 253 },
+        ankleL: { x: 235, y: 320 }, ankleR: { x: 405, y: 320 },
+      });
+      const bottom = pose(wide, {
+        head: { x: 320, y: 108 }, neck: { x: 320, y: 137 },
+        shoulderL: { x: 286, y: 151 }, shoulderR: { x: 354, y: 151 },
+        elbowL: { x: 298, y: 181 }, elbowR: { x: 342, y: 181 },
+        wristL: { x: 312, y: 224 }, wristR: { x: 328, y: 224 },
+        hipL: { x: 295, y: 232 }, hipR: { x: 345, y: 232 },
+        kneeL: { x: 253, y: 266 }, kneeR: { x: 387, y: 266 },
+      });
+      return make("Agachamento sumô — base ampla e joelhos abertos", "Mantenha pés bem afastados, joelhos na direção das pontas e a carga centralizada entre as pernas.", [wide, bottom], 3100, "floor", "frontal");
+    }
+    if (id.includes("sissy-squat")) {
+      const tall = pose(standingSide, {
+        elbowL: { x: 382, y: 130 }, elbowR: { x: 394, y: 136 },
+        wristL: { x: 420, y: 118 }, wristR: { x: 432, y: 124 },
+      });
+      const lowered = pose(tall, {
+        head: { x: 294, y: 116 }, neck: { x: 303, y: 145 },
+        shoulderL: { x: 308, y: 162 }, shoulderR: { x: 320, y: 166 },
+        elbowL: { x: 347, y: 148 }, elbowR: { x: 359, y: 153 },
+        wristL: { x: 387, y: 135 }, wristR: { x: 399, y: 140 },
+        hipL: { x: 337, y: 213 }, hipR: { x: 350, y: 216 },
+        kneeL: { x: 382, y: 264 }, kneeR: { x: 394, y: 266 },
+        ankleL: { x: 352, y: 320 }, ankleR: { x: 365, y: 320 },
+      });
+      return make("Sissy squat — joelhos à frente e tronco alinhado", "Eleve os calcanhares e desça joelhos à frente mantendo ombros, quadril e joelhos em uma linha longa.", [tall, lowered], 3000, "floor", "lateral");
+    }
+    if (id.includes("hack-squat")) {
+      const supported = pose(standingSide, {
+        head: { x: 342, y: 57 }, neck: { x: 337, y: 87 },
+        shoulderL: { x: 334, y: 103 }, shoulderR: { x: 347, y: 103 },
+        elbowL: { x: 367, y: 126 }, elbowR: { x: 379, y: 132 },
+        wristL: { x: 348, y: 151 }, wristR: { x: 360, y: 157 },
+        hipL: { x: 326, y: 190 }, hipR: { x: 341, y: 190 },
+        kneeL: { x: 361, y: 251 }, kneeR: { x: 375, y: 253 },
+        ankleL: { x: 387, y: 320 }, ankleR: { x: 401, y: 320 },
+      });
+      const bottom = pose(supported, {
+        head: { x: 310, y: 119 }, neck: { x: 310, y: 148 },
+        shoulderL: { x: 309, y: 164 }, shoulderR: { x: 322, y: 164 },
+        elbowL: { x: 345, y: 182 }, elbowR: { x: 357, y: 188 },
+        wristL: { x: 329, y: 209 }, wristR: { x: 341, y: 215 },
+        hipL: { x: 306, y: 230 }, hipR: { x: 321, y: 230 },
+        kneeL: { x: 377, y: 260 }, kneeR: { x: 391, y: 264 },
+      });
+      return make("Hack squat — tronco apoiado em trilho", "Mantenha costas e ombros no encosto enquanto flexiona joelhos e quadris sobre a plataforma.", [supported, bottom], 3050, "machine", "lateral");
+    }
+    if (id.includes("pendulum-squat")) {
+      const top = pose(standingSide, {
+        head: { x: 345, y: 58 }, neck: { x: 340, y: 88 },
+        shoulderL: { x: 336, y: 103 }, shoulderR: { x: 349, y: 103 },
+        elbowL: { x: 366, y: 129 }, elbowR: { x: 378, y: 135 },
+        wristL: { x: 345, y: 151 }, wristR: { x: 357, y: 157 },
+        hipL: { x: 318, y: 189 }, hipR: { x: 333, y: 189 },
+        kneeL: { x: 350, y: 252 }, kneeR: { x: 364, y: 254 },
+        ankleL: { x: 402, y: 320 }, ankleR: { x: 416, y: 320 },
+      });
+      const deepArc = pose(top, {
+        head: { x: 290, y: 125 }, neck: { x: 294, y: 154 },
+        shoulderL: { x: 297, y: 170 }, shoulderR: { x: 310, y: 170 },
+        elbowL: { x: 332, y: 189 }, elbowR: { x: 344, y: 195 },
+        wristL: { x: 314, y: 216 }, wristR: { x: 326, y: 222 },
+        hipL: { x: 286, y: 239 }, hipR: { x: 301, y: 239 },
+        kneeL: { x: 373, y: 258 }, kneeR: { x: 387, y: 263 },
+      });
+      return make("Pendulum squat — descida em arco guiado", "Acompanhe o arco da máquina com o tronco apoiado e mantenha os pés firmes na plataforma.", [top, deepArc], 3200, "machine", "lateral");
+    }
+    const shoulderLoaded = equipment.includes("barra") || equipment.includes("smith");
+    const top = shoulderLoaded ? pose(standingFront, {
+      elbowL: { x: 270, y: 122 }, elbowR: { x: 370, y: 122 },
+      wristL: { x: 296, y: 101 }, wristR: { x: 344, y: 101 },
+    }) : standingFront;
+    const bottom = pose(top, { head: { x: 320, y: 112 }, neck: { x: 320, y: 139 }, shoulderL: { x: 286, y: 149 }, shoulderR: { x: 354, y: 149 }, elbowL: { x: 270, y: 170 }, elbowR: { x: 370, y: 170 }, wristL: { x: 296, y: 146 }, wristR: { x: 344, y: 146 }, hipL: { x: 300, y: 232 }, hipR: { x: 340, y: 232 }, kneeL: { x: 268, y: 262 }, kneeR: { x: 372, y: 262 } });
+    return make(id.includes("front") ? "Agachamento frontal — tronco vertical" : id.includes("sumo") ? "Agachamento sumô — base ampla" : id.includes("sissy") ? "Sissy squat — dominância de joelho" : id.includes("hack") || id.includes("pendulum") ? "Agachamento guiado — trilho de máquina" : "Agachamento — flexão coordenada de quadril e joelho", "Joelhos acompanham os pés; mantenha pressão uniforme e coluna estável.", [top, bottom], 3000, equipment.includes("máquina") ? "machine" : "floor", "frontal");
   }
 
   if (movement === "hinge") {
-    const hinged = pose(standingSide, { head: { x: 421, y: 139 }, neck: { x: 394, y: 155 }, shoulderL: { x: 365, y: 168 }, shoulderR: { x: 375, y: 175 }, elbowL: { x: 385, y: 207 }, elbowR: { x: 396, y: 214 }, wristL: { x: 401, y: 252 }, wristR: { x: 413, y: 256 }, kneeL: { x: 337, y: 249 }, kneeR: { x: 350, y: 253 } });
-    const swing = pose(standingSide, { elbowL: { x: 399, y: 111 }, elbowR: { x: 411, y: 116 }, wristL: { x: 448, y: 102 }, wristR: { x: 459, y: 108 } });
-    return make(id.includes("kettlebell") ? "Kettlebell swing — extensão balística de quadril" : id.includes("sumo") ? "Terra sumô — hinge com base ampla" : id.includes("good-morning") ? "Good morning — hinge com carga posterior" : "Levantamento terra romeno — hinge de quadril", "Leve o quadril para trás mantendo coluna neutra e carga próxima ao corpo.", [hinged, id.includes("kettlebell") ? swing : standingSide], id.includes("kettlebell") ? 1900 : 3100, "floor", "lateral");
+    if (id.includes("pull-through")) {
+      const hinged = pose(standingSide, {
+        head: { x: 420, y: 137 }, neck: { x: 394, y: 153 },
+        shoulderL: { x: 365, y: 166 }, shoulderR: { x: 375, y: 173 },
+        elbowL: { x: 351, y: 204 }, elbowR: { x: 363, y: 211 },
+        wristL: { x: 323, y: 232 }, wristR: { x: 335, y: 239 },
+        hipL: { x: 315, y: 201 }, hipR: { x: 330, y: 201 },
+        kneeL: { x: 333, y: 255 }, kneeR: { x: 348, y: 255 },
+      });
+      const locked = pose(standingSide, {
+        elbowL: { x: 347, y: 150 }, elbowR: { x: 361, y: 150 },
+        wristL: { x: 336, y: 194 }, wristR: { x: 351, y: 194 },
+      });
+      return make("Pull through — extensão de quadril no cabo", "Afaste o quadril da polia e termine ereto pela contração dos glúteos, sem puxar com os braços.", [hinged, locked], 2850, "cable-low", "lateral");
+    }
+    if (id.includes("back-extension") || id.includes("hyperextension") || id.includes("hyper-extension")) {
+      const supported = pose(standingSide, {
+        head: { x: 407, y: 104 }, neck: { x: 383, y: 123 },
+        shoulderL: { x: 355, y: 139 }, shoulderR: { x: 366, y: 146 },
+        elbowL: { x: 373, y: 166 }, elbowR: { x: 384, y: 173 },
+        wristL: { x: 347, y: 181 }, wristR: { x: 358, y: 188 },
+        hipL: { x: 310, y: 198 }, hipR: { x: 325, y: 203 },
+        kneeL: { x: 285, y: 257 }, kneeR: { x: 300, y: 262 },
+        ankleL: { x: 253, y: 316 }, ankleR: { x: 268, y: 320 },
+      });
+      const lowered = pose(supported, {
+        head: { x: 451, y: 176 }, neck: { x: 423, y: 185 },
+        shoulderL: { x: 391, y: 191 }, shoulderR: { x: 402, y: 198 },
+        elbowL: { x: 385, y: 220 }, elbowR: { x: 396, y: 227 },
+        wristL: { x: 356, y: 205 }, wristR: { x: 367, y: 212 },
+      });
+      return make("Hiperextensão apoiada — extensão de quadril", "Gire sobre o apoio do quadril e suba somente até alinhar tronco e pernas, sem hiperestender a lombar.", [lowered, supported], 3100, "bench", "lateral");
+    }
+    const lockout = pose(standingSide, {
+      elbowL: { x: 347, y: 151 }, elbowR: { x: 361, y: 151 },
+      wristL: { x: 349, y: 201 }, wristR: { x: 363, y: 201 },
+    });
+    if (id.includes("rack-pull")) {
+      const rackStart = pose(standingSide, {
+        head: { x: 402, y: 116 }, neck: { x: 380, y: 136 },
+        shoulderL: { x: 354, y: 151 }, shoulderR: { x: 365, y: 158 },
+        elbowL: { x: 372, y: 195 }, elbowR: { x: 383, y: 202 },
+        wristL: { x: 385, y: 239 }, wristR: { x: 396, y: 246 },
+        hipL: { x: 319, y: 195 }, hipR: { x: 334, y: 198 },
+        kneeL: { x: 334, y: 253 }, kneeR: { x: 348, y: 255 },
+      });
+      return make("Rack pull — puxada parcial abaixo dos joelhos", "Inicie com a barra apoiada no rack, trave o tronco e estenda o quadril mantendo a carga próxima.", [rackStart, lockout], 3000, "machine", "lateral");
+    }
+    if (id.includes("conventional-deadlift")) {
+      const floorStart = pose(standingSide, {
+        head: { x: 406, y: 122 }, neck: { x: 382, y: 142 },
+        shoulderL: { x: 355, y: 157 }, shoulderR: { x: 366, y: 164 },
+        elbowL: { x: 371, y: 210 }, elbowR: { x: 382, y: 217 },
+        wristL: { x: 382, y: 274 }, wristR: { x: 393, y: 281 },
+        hipL: { x: 315, y: 216 }, hipR: { x: 330, y: 219 },
+        kneeL: { x: 360, y: 263 }, kneeR: { x: 374, y: 266 },
+        ankleL: { x: 349, y: 320 }, ankleR: { x: 363, y: 320 },
+      });
+      return make("Levantamento terra convencional — saída do chão", "Empurre o chão enquanto quadris e ombros sobem juntos; mantenha a barra rente às pernas.", [floorStart, lockout], 3300, "floor", "lateral");
+    }
+    if (id.includes("sumo-deadlift")) {
+      const wideLockout = pose(standingFront, {
+        elbowL: { x: 303, y: 151 }, elbowR: { x: 337, y: 151 },
+        wristL: { x: 309, y: 204 }, wristR: { x: 331, y: 204 },
+        kneeL: { x: 278, y: 253 }, kneeR: { x: 362, y: 253 },
+        ankleL: { x: 241, y: 320 }, ankleR: { x: 399, y: 320 },
+      });
+      const floorStart = pose(wideLockout, {
+        head: { x: 320, y: 110 }, neck: { x: 320, y: 139 },
+        shoulderL: { x: 287, y: 153 }, shoulderR: { x: 353, y: 153 },
+        elbowL: { x: 302, y: 204 }, elbowR: { x: 338, y: 204 },
+        wristL: { x: 309, y: 278 }, wristR: { x: 331, y: 278 },
+        hipL: { x: 299, y: 226 }, hipR: { x: 341, y: 226 },
+        kneeL: { x: 263, y: 268 }, kneeR: { x: 377, y: 268 },
+      });
+      return make("Levantamento terra sumô — base ampla e braços internos", "Abra os joelhos sobre os pés e suba mantendo os braços entre as coxas e a barra junto ao corpo.", [floorStart, wideLockout], 3300, "floor", "frontal");
+    }
+    if (id.includes("good-morning")) {
+      const barTop = pose(standingSide, {
+        elbowL: { x: 310, y: 121 }, elbowR: { x: 323, y: 126 },
+        wristL: { x: 335, y: 103 }, wristR: { x: 348, y: 108 },
+      });
+      const folded = pose(barTop, {
+        head: { x: 426, y: 132 }, neck: { x: 399, y: 148 },
+        shoulderL: { x: 369, y: 160 }, shoulderR: { x: 380, y: 167 },
+        elbowL: { x: 347, y: 184 }, elbowR: { x: 358, y: 191 },
+        wristL: { x: 372, y: 161 }, wristR: { x: 383, y: 168 },
+        hipL: { x: 316, y: 198 }, hipR: { x: 331, y: 201 },
+        kneeL: { x: 333, y: 253 }, kneeR: { x: 347, y: 255 },
+      });
+      return make("Good morning — barra apoiada nas costas", "Leve o quadril para trás com joelhos suaves e mantenha a barra estável sobre as costas.", [barTop, folded], 3200, "floor", "lateral");
+    }
+    if (id.includes("single-leg-rdl")) {
+      const balanceStart = pose(lockout, {
+        ankleL: { x: 315, y: 320 }, ankleR: { x: 351, y: 320 },
+      });
+      const balanceHinge = pose(standingSide, {
+        head: { x: 431, y: 137 }, neck: { x: 402, y: 152 },
+        shoulderL: { x: 371, y: 164 }, shoulderR: { x: 382, y: 171 },
+        elbowL: { x: 389, y: 207 }, elbowR: { x: 400, y: 214 },
+        wristL: { x: 404, y: 251 }, wristR: { x: 416, y: 257 },
+        hipL: { x: 316, y: 195 }, hipR: { x: 331, y: 198 },
+        kneeL: { x: 335, y: 253 }, ankleL: { x: 325, y: 320 },
+        kneeR: { x: 265, y: 185 }, ankleR: { x: 202, y: 176 },
+      });
+      return make("Terra romeno unilateral — hinge em apoio único", "Mantenha a pelve nivelada enquanto tronco e perna livre se afastam como um bloco.", [balanceStart, balanceHinge], 3400, "floor", "lateral");
+    }
+    if (id.includes("kettlebell")) {
+      const loaded = pose(standingSide, {
+        head: { x: 421, y: 139 }, neck: { x: 394, y: 155 },
+        shoulderL: { x: 365, y: 168 }, shoulderR: { x: 375, y: 175 },
+        elbowL: { x: 385, y: 207 }, elbowR: { x: 396, y: 214 },
+        wristL: { x: 401, y: 252 }, wristR: { x: 413, y: 256 },
+        kneeL: { x: 337, y: 249 }, kneeR: { x: 350, y: 253 },
+      });
+      const swing = pose(standingSide, { elbowL: { x: 399, y: 111 }, elbowR: { x: 411, y: 116 }, wristL: { x: 448, y: 102 }, wristR: { x: 459, y: 108 } });
+      return make("Kettlebell swing — extensão balística de quadril", "Projete a carga pela extensão rápida do quadril, mantendo braços longos e coluna neutra.", [loaded, swing], 1900, "floor", "lateral");
+    }
+    if (id.includes("stiff")) {
+      const stiffBottom = pose(standingSide, {
+        head: { x: 432, y: 145 }, neck: { x: 403, y: 159 },
+        shoulderL: { x: 371, y: 171 }, shoulderR: { x: 382, y: 178 },
+        elbowL: { x: 391, y: 219 }, elbowR: { x: 402, y: 226 },
+        wristL: { x: 407, y: 278 }, wristR: { x: 418, y: 284 },
+        hipL: { x: 313, y: 194 }, hipR: { x: 328, y: 197 },
+        kneeL: { x: 322, y: 254 }, kneeR: { x: 336, y: 256 },
+      });
+      return make("Terra stiff — joelhos quase estendidos", "Empurre o quadril para trás mantendo apenas uma leve flexão dos joelhos e pare antes de arredondar a coluna.", [lockout, stiffBottom], 3250, "floor", "lateral");
+    }
+    const romanianBottom = pose(standingSide, {
+      head: { x: 421, y: 139 }, neck: { x: 394, y: 155 },
+      shoulderL: { x: 365, y: 168 }, shoulderR: { x: 375, y: 175 },
+      elbowL: { x: 385, y: 207 }, elbowR: { x: 396, y: 214 },
+      wristL: { x: 401, y: 260 }, wristR: { x: 413, y: 266 },
+      hipL: { x: 312, y: 195 }, hipR: { x: 327, y: 198 },
+      kneeL: { x: 337, y: 249 }, kneeR: { x: 350, y: 253 },
+    });
+    return make("Levantamento terra romeno — descida a partir do topo", "Inicie ereto, leve o quadril para trás e desça a barra rente às pernas com joelhos levemente flexionados.", [lockout, romanianBottom], 3200, "floor", "lateral");
   }
 
   if (movement === "lunge") {
     const split = pose(standingSide, { hipL: { x: 326, y: 211 }, hipR: { x: 340, y: 211 }, kneeL: { x: 394, y: 259 }, ankleL: { x: 424, y: 320 }, kneeR: { x: 292, y: 264 }, ankleR: { x: 238, y: 320 } });
     const low = pose(split, { head: { x: 361, y: 83 }, neck: { x: 350, y: 112 }, shoulderL: { x: 343, y: 127 }, shoulderR: { x: 357, y: 126 }, hipL: { x: 325, y: 224 }, hipR: { x: 340, y: 224 }, kneeL: { x: 398, y: 261 }, kneeR: { x: 292, y: 278 } });
-    return make(id.includes("curtsy") ? "Afundo cruzado — plano diagonal" : id.includes("walking") ? "Passada — transferência alternada" : id.includes("step-up") ? "Step-up — subida unilateral" : id.includes("bulgarian") ? "Agachamento búlgaro — apoio traseiro" : "Afundo — descida unilateral", "Desça verticalmente e mantenha o joelho alinhado ao segundo dedo do pé.", [split, low], 3000, id.includes("step") || id.includes("bulgarian") ? "step" : "floor", "lateral");
+    if (id.includes("curtsy")) {
+      const crossed = pose(standingFront, {
+        hipL: { x: 301, y: 204 }, hipR: { x: 337, y: 204 },
+        kneeL: { x: 285, y: 258 }, ankleL: { x: 274, y: 320 },
+        kneeR: { x: 340, y: 266 }, ankleR: { x: 268, y: 318 },
+      });
+      const lowered = pose(crossed, {
+        head: { x: 314, y: 91 }, neck: { x: 314, y: 120 },
+        shoulderL: { x: 280, y: 134 }, shoulderR: { x: 348, y: 134 },
+        hipL: { x: 296, y: 226 }, hipR: { x: 334, y: 226 },
+        kneeL: { x: 278, y: 270 }, kneeR: { x: 337, y: 281 },
+      });
+      return make("Afundo curtsy — passada cruzada posterior", "Cruze a perna de trás na diagonal sem girar a pelve e mantenha o joelho da frente alinhado.", [standingFront, crossed, lowered], 3200, "floor", "frontal");
+    }
+    if (id.includes("walking")) {
+      const nextSplit = pose(split, {
+        kneeL: split.kneeR, ankleL: split.ankleR,
+        kneeR: split.kneeL, ankleR: split.ankleL,
+      });
+      const nextLow = pose(low, {
+        kneeL: low.kneeR, ankleL: split.ankleR,
+        kneeR: low.kneeL, ankleR: split.ankleL,
+      });
+      return make("Passada caminhando — transferência alternada", "Avance, estabilize a base e passe diretamente para a perna seguinte sem perder a altura do tronco.", [standingSide, split, low, shift(standingSide, 28, 0), nextSplit, nextLow], 5200, "floor", "lateral");
+    }
+    if (id.includes("step-up")) {
+      const planted = pose(standingSide, {
+        hipL: { x: 330, y: 196 }, hipR: { x: 345, y: 196 },
+        kneeL: { x: 397, y: 236 }, ankleL: { x: 430, y: 278 },
+        kneeR: { x: 300, y: 259 }, ankleR: { x: 262, y: 320 },
+      });
+      const onTopBase = shift(standingSide, 48, -42);
+      const onTop = pose(onTopBase, {
+        hipL: { x: 371, y: 151 }, hipR: { x: 386, y: 151 },
+        kneeL: { x: 405, y: 210 }, ankleL: { x: 430, y: 278 },
+        kneeR: { x: 438, y: 178 }, ankleR: { x: 456, y: 226 },
+      });
+      return make("Step-up — subida unilateral no banco", "Apoie o pé inteiro, suba pela perna que está no banco e evite impulsionar com a perna de baixo.", [planted, onTop], 3100, "step", "lateral");
+    }
+    if (id.includes("bulgarian")) {
+      const rearSupported = pose(split, {
+        hipL: { x: 330, y: 202 }, hipR: { x: 345, y: 202 },
+        kneeL: { x: 397, y: 254 }, ankleL: { x: 427, y: 320 },
+        kneeR: { x: 286, y: 250 }, ankleR: { x: 238, y: 278 },
+      });
+      const bottom = pose(rearSupported, {
+        head: { x: 365, y: 91 }, neck: { x: 354, y: 120 },
+        shoulderL: { x: 347, y: 135 }, shoulderR: { x: 361, y: 134 },
+        hipL: { x: 330, y: 231 }, hipR: { x: 345, y: 231 },
+        kneeL: { x: 402, y: 266 }, kneeR: { x: 287, y: 278 },
+      });
+      return make("Agachamento búlgaro — pé traseiro elevado", "Desça o quadril entre os apoios mantendo o pé traseiro relaxado e a perna da frente estável.", [rearSupported, bottom], 3200, "step", "lateral");
+    }
+    return make("Afundo — descida unilateral", "Desça verticalmente e mantenha o joelho alinhado ao segundo dedo do pé.", [split, low], 3000, "floor", "lateral");
   }
 
   if (movement === "knee-flexion") {
@@ -425,7 +775,7 @@ function resolveMotion(exercise: MotionExercise): MotionSpec {
     }
     const start = quadrupedSide;
     const kick = pose(start, { kneeL: { x: 271, y: 173 }, ankleL: { x: 210, y: 176 } });
-    return make(id.includes("pull-through") ? "Pull through — extensão no cabo" : id.includes("back-extension") || id.includes("hyper") ? "Hiperextensão — extensão controlada" : "Coice de glúteo — extensão unilateral", "Movimente o quadril sem rodar a pelve ou arquear a lombar.", [start, kick], 2700, equipment.includes("polia") ? "cable-low" : equipment.includes("máquina") ? "machine" : "mat", "lateral");
+    return make("Coice de glúteo — extensão unilateral", "Movimente o quadril sem rodar a pelve ou arquear a lombar.", [start, kick], 2700, equipment.includes("polia") ? "cable-low" : equipment.includes("máquina") ? "machine" : "mat", "lateral");
   }
 
   if (movement === "hip-abduction") {
@@ -438,19 +788,42 @@ function resolveMotion(exercise: MotionExercise): MotionSpec {
       const raised = pose(side, { kneeL: { x: 265, y: 162 }, ankleL: { x: 196, y: 136 } });
       return make("Elevação lateral de perna — abdução no solo", "Mantenha a pelve empilhada e eleve a perna sem rodar o pé.", [side, raised], 2700, "mat", "lateral");
     }
-    if (/clamshell|fire-hydrant|donkey/.test(id)) {
+    if (id.includes("clamshell")) {
+      const closed = pose(lyingSide, {
+        head: { x: 455, y: 226 }, neck: { x: 427, y: 235 },
+        shoulderL: { x: 396, y: 241 }, shoulderR: { x: 404, y: 249 },
+        elbowL: { x: 421, y: 273 }, elbowR: { x: 429, y: 281 },
+        wristL: { x: 447, y: 291 }, wristR: { x: 455, y: 299 },
+        hipL: { x: 310, y: 256 }, hipR: { x: 318, y: 264 },
+        kneeL: { x: 253, y: 284 }, kneeR: { x: 261, y: 292 },
+        ankleL: { x: 298, y: 317 }, ankleR: { x: 306, y: 324 },
+      });
+      const opened = pose(closed, {
+        kneeL: { x: 257, y: 230 },
+        ankleL: { x: 298, y: 306 },
+      });
+      return make("Clamshell — rotação externa deitado", "Mantenha pés unidos e pelve empilhada enquanto abre apenas o joelho de cima.", [closed, opened], 2750, "mat", "lateral");
+    }
+    if (/fire-hydrant|donkey/.test(id)) {
       const open = pose(quadrupedSide, { kneeL: { x: 295, y: 202 }, ankleL: { x: 254, y: 223 } });
-      return make(id.includes("clamshell") ? "Clamshell — rotação/abdução lateral" : "Fire hydrant — abdução em quatro apoios", "Abra o quadril sem girar o tronco ou deslocar o apoio.", [quadrupedSide, open], 2600, "mat", "lateral");
+      return make("Fire hydrant — abdução em quatro apoios", "Abra o quadril sem girar o tronco ou deslocar o apoio.", [quadrupedSide, open], 2600, "mat", "lateral");
     }
     const open = pose(standingFront, { kneeL: { x: 245, y: 255 }, ankleL: { x: 204, y: 306 } });
     return make(id.includes("lateral-band") || id.includes("monster") ? "Caminhada com faixa — abdução dinâmica" : equipment.includes("máquina") ? "Abdutora — abertura controlada" : "Abdução de quadril — elevação lateral", "Mantenha a pelve nivelada e abra pela lateral do quadril.", [standingFront, open], 2800, equipment.includes("máquina") ? "machine" : equipment.includes("polia") ? "cable-low" : "floor", "frontal");
   }
 
   if (movement === "ankle-extension") {
+    if (id.includes("seated")) {
+      const raised = pose(seatedSide, {
+        kneeL: { x: 397, y: 224 }, kneeR: { x: 408, y: 232 },
+        ankleL: { x: 394, y: 302 }, ankleR: { x: 420, y: 302 },
+      });
+      return make("Panturrilha sentada — flexão plantar", "Mantenha os joelhos estáveis, eleve os calcanhares pelo hálux e pause no topo.", [seatedSide, raised], 2450, "machine", "lateral");
+    }
     const raised = shift(standingFront, 0, -18);
     raised.ankleL = standingFront.ankleL;
     raised.ankleR = standingFront.ankleR;
-    return make(id.includes("seated") ? "Panturrilha sentada — flexão plantar" : id.includes("tibialis") ? "Elevação tibial — dorsiflexão" : id.includes("single") ? "Panturrilha unilateral — flexão plantar" : "Panturrilha em pé — flexão plantar", "Suba pelo hálux, pause no topo e desça sem perder o alinhamento.", [standingFront, raised], 2350, id.includes("step") ? "step" : equipment.includes("máquina") ? "machine" : "floor", "frontal");
+    return make(id.includes("tibialis") ? "Elevação tibial — dorsiflexão" : id.includes("single") ? "Panturrilha unilateral — flexão plantar" : "Panturrilha em pé — flexão plantar", "Suba pelo hálux, pause no topo e desça sem perder o alinhamento.", [standingFront, raised], 2350, id.includes("step") ? "step" : equipment.includes("máquina") ? "machine" : "floor", "frontal");
   }
 
   if (movement === "carry") {
@@ -466,9 +839,44 @@ function resolveMotion(exercise: MotionExercise): MotionSpec {
   }
 
   if (movement === "crunch") {
+    if (id.includes("cable")) {
+      const tall = pose(kneelingSide, {
+        elbowL: { x: 370, y: 111 }, elbowR: { x: 382, y: 117 },
+        wristL: { x: 389, y: 83 }, wristR: { x: 401, y: 89 },
+      });
+      const crunched = pose(tall, {
+        head: { x: 414, y: 145 }, neck: { x: 391, y: 161 },
+        shoulderL: { x: 363, y: 174 }, shoulderR: { x: 375, y: 181 },
+        elbowL: { x: 386, y: 152 }, elbowR: { x: 398, y: 159 },
+        wristL: { x: 405, y: 124 }, wristR: { x: 417, y: 131 },
+      });
+      return make("Crunch ajoelhado na polia", "Flexione o tronco aproximando costelas e pelve; braços apenas sustentam o cabo.", [tall, crunched], 2850, "cable-high", "lateral");
+    }
+    if (id.includes("hanging")) {
+      const raised = pose(hangingFront, {
+        hipL: { x: 305, y: 210 }, hipR: { x: 335, y: 210 },
+        kneeL: { x: 286, y: 190 }, kneeR: { x: 354, y: 190 },
+        ankleL: { x: 265, y: 142 }, ankleR: { x: 375, y: 142 },
+      });
+      return make("Elevação de pernas suspenso", "Eleve as pernas pela retroversão da pelve sem embalar o tronco ou encolher os ombros.", [hangingFront, raised], 3000, "pullup", "frontal");
+    }
+    if (id.includes("reverse")) {
+      const tucked = pose(lyingSide, {
+        elbowL: { x: 410, y: 239 }, elbowR: { x: 419, y: 247 },
+        wristL: { x: 375, y: 258 }, wristR: { x: 384, y: 266 },
+        kneeL: { x: 271, y: 203 }, kneeR: { x: 282, y: 211 },
+        ankleL: { x: 230, y: 247 }, ankleR: { x: 241, y: 255 },
+      });
+      const curled = pose(tucked, {
+        hipL: { x: 319, y: 198 }, hipR: { x: 330, y: 206 },
+        kneeL: { x: 315, y: 151 }, kneeR: { x: 326, y: 159 },
+        ankleL: { x: 274, y: 126 }, ankleR: { x: 285, y: 134 },
+      });
+      return make("Crunch reverso — retroversão pélvica", "Enrole a pelve em direção às costelas sem lançar as pernas nem empurrar o chão com os braços.", [tucked, curled], 2800, "mat", "lateral");
+    }
     const flat = pose(lyingSide, { wristL: { x: 435, y: 178 }, wristR: { x: 445, y: 185 } });
     const flexed = pose(flat, { head: { x: 415, y: 149 }, neck: { x: 393, y: 169 }, shoulderL: { x: 365, y: 184 }, shoulderR: { x: 375, y: 192 } });
-    return make(id.includes("cable") ? "Crunch ajoelhado na polia" : id.includes("reverse") ? "Crunch reverso — retroversão pélvica" : id.includes("hanging") ? "Elevação abdominal suspensa" : "Crunch — flexão segmentar do tronco", "Aproxime costelas e pelve sem puxar a cabeça.", [flat, flexed], 2700, id.includes("cable") ? "cable-high" : "mat", "lateral");
+    return make("Crunch — flexão segmentar do tronco", "Aproxime costelas e pelve sem puxar a cabeça.", [flat, flexed], 2700, "mat", "lateral");
   }
 
   if (movement === "antirotation") {

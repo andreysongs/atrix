@@ -174,3 +174,9 @@ Arquivos MP4 próprios são suportados diretamente pelo player e pelo cache soli
 Cada um dos 212 exercícios possui uma capa individual em WebP dentro de `public/media/exercises/olympus/`. As 19 fotografias originais aprovadas foram preservadas e o restante foi produzido no mesmo padrão editorial: atleta realista, academia escura, equipamento visível e luz dourada discreta. Os ativos estão integrados aos cards, ao painel de detalhes, ao modo de treino e aos guias offline.
 
 `npm run assets:exercises` valida a cobertura dos 212 arquivos e, quando as folhas-fonte estão disponíveis em `tmp/olympus-photo-sheets/`, refaz os recortes em 1280 × 720. Nenhuma mídia da Nike ou de outro aplicativo é distribuída no catálogo.
+
+### Execução com atleta humano 3D
+
+Ao abrir **Ver execução 3D**, o app inicializa um modelo humano articulado e procedural em WebGL2 usando Three.js. O personagem é renderizado em tempo real, com movimento contínuo em loop, Play/Pause, velocidade, câmera orbital em 360°, zoom, tela cheia, equipamentos e destaque azul/amarelo para músculos principais e secundários. O motor usa `setAnimationLoop`, resolução adaptativa, pausa de renderização quando o quadro está estático e descarte explícito de recursos gráficos para funcionar na Web e nos WebViews do Android/iOS.
+
+Os 212 exercícios possuem identificadores `.motion3d` estáveis, mapeados para perfis de movimento procedurais e validados por `npm run motion:validate`. As fotografias continuam sendo usadas apenas nas capas dos cards; não existem GIFs ou vídeos dentro do visualizador de execução.

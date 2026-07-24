@@ -83,7 +83,7 @@ import { listOfflineGuides, removeOfflineGuide, saveOfflineGuide } from "@/lib/o
 import { ProgramsView, PulseEditorialHero } from "@/components/training-media";
 import { ForgeOnboarding, MobilityView, ProfileView, RunningView, TrainerView, type ForgeOnboardingData } from "@/components/forge-modules";
 
-const loadExerciseMotionPlayer = () => import("@/components/exercise-motion-player").then((module) => module.ExerciseMotionPlayer);
+const loadExerciseMotionPlayer = () => import("@/components/exercise-human-3d-player").then((module) => module.ExerciseMotionPlayer);
 
 const ExerciseMotionPlayer = dynamic(
   loadExerciseMotionPlayer,
@@ -916,7 +916,7 @@ function LibraryView({ savedExerciseIds, onAddToNextWorkout, onToast, initialQue
                 </button>
                 <button type="button" className="exercise-execution-cta" onClick={(event) => { selectedTriggerRef.current = event.currentTarget; setSelected(exercise); setDetailTab("technique"); }}>
                   <span className="exercise-execution-icon"><Play size={14} fill="currentColor" /></span>
-                  <span><strong>Ver execução</strong><small>Animação articulada em loop</small></span>
+                  <span><strong>Ver execução 3D</strong><small>Atleta humano · câmera 360°</small></span>
                   <ChevronRight size={16} aria-hidden="true" />
                 </button>
               </motion.article>
@@ -939,7 +939,7 @@ function LibraryView({ savedExerciseIds, onAddToNextWorkout, onToast, initialQue
               <div className="detail-screen-body">
                 <section className="detail-motion-column" aria-label="Demonstração visual">
                   <ExerciseMotionPlayer key={selected.id} exercise={selected} />
-                  <p className="drawer-description">Modelo articulado exclusivo carregado pelo identificador <code>{selected.animationFile}</code>. Use como referência visual e respeite seus limites de mobilidade.</p>
+                  <p className="drawer-description">Modelo humano 3D interativo carregado pelo perfil <code>{selected.animationFile}</code>. Gire em 360°, ajuste o zoom e use como referência visual, respeitando seus limites de mobilidade.</p>
                   <div className="drawer-stat-grid"><div><span>Músculo principal</span><strong>{selected.primary}</strong></div><div><span>Secundários</span><strong>{selected.secondary}</strong></div><div><span>Nível</span><strong>{selected.level}</strong></div><div><span>Seu recorde</span><strong>{selected.best}</strong></div></div>
                 </section>
                 <section className="detail-guidance-column" aria-label="Orientações do exercício">
@@ -1459,7 +1459,12 @@ export function PerformanceApp() {
   }, []);
 
   useEffect(() => {
-    if (view === "library") void loadExerciseMotionPlayer();
+    if (view === "library") {
+      // The player is an optional, client-only chunk. Offline on a first visit the
+      // preload may fail before the service worker has ever cached it; consuming
+      // the rejection prevents an unhandled promise without blocking the library.
+      void loadExerciseMotionPlayer().catch(() => undefined);
+    }
   }, [view]);
 
   useEffect(() => {

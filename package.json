@@ -31,7 +31,8 @@
     "next": "^15.5.9",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "recharts": "^3.6.0"
+    "recharts": "^3.6.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
@@ -39,6 +40,7 @@
     "@types/node": "^22.19.7",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
+    "@types/three": "^0.185.1",
     "eslint": "^9.39.2",
     "eslint-config-next": "^15.5.9",
     "typescript": "^5.9.3"

@@ -9,6 +9,13 @@ const supportedMovements = new Set([
 
 const seedFile = JSON.parse(await readFile(resolve("src/data/exercise-seeds.json"), "utf8"));
 if (!Array.isArray(seedFile.exercises) || seedFile.exercises.length === 0) throw new Error("Exercise catalog is empty.");
+const viewerSource = await readFile(resolve("src/components/exercise-human-3d-player.tsx"), "utf8");
+for (const requiredFeature of ["WebGLRenderer", "OrbitControls", "createAthlete", "highlightFor", "setAnimationLoop"]) {
+  if (!viewerSource.includes(requiredFeature)) throw new Error(`3D viewer is missing required feature: ${requiredFeature}`);
+}
+if (/<video|<img|\.gif|\.mp4/i.test(viewerSource)) {
+  throw new Error("The execution viewer must not fall back to images, GIFs, or recorded videos.");
+}
 
 const ids = new Set();
 const animationIds = new Set();
@@ -16,7 +23,7 @@ const unsupported = new Set();
 for (const exercise of seedFile.exercises) {
   if (!exercise.id || ids.has(exercise.id)) throw new Error(`Invalid or duplicate exercise id: ${exercise.id}`);
   ids.add(exercise.id);
-  const animationId = `${exercise.id}.rig`;
+  const animationId = `${exercise.id}.motion3d`;
   if (animationIds.has(animationId)) throw new Error(`Duplicate animation id: ${animationId}`);
   animationIds.add(animationId);
   if (!supportedMovements.has(exercise.movement)) unsupported.add(exercise.movement || "<missing>");
@@ -24,4 +31,4 @@ for (const exercise of seedFile.exercises) {
 }
 
 if (unsupported.size > 0) throw new Error(`Unsupported movement profiles: ${Array.from(unsupported).join(", ")}`);
-process.stdout.write(`Motion coverage OK: ${ids.size} exercises, ${animationIds.size} unique .rig identifiers, ${supportedMovements.size} movement families.\n`);
+process.stdout.write(`3D catalog coverage OK: ${ids.size} exercises, ${animationIds.size} stable motion3d identifiers, ${supportedMovements.size} movement families, WebGL2 human viewer verified.\n`);
