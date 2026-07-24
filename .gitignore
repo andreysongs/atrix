@@ -8,8 +8,11 @@
 /icons/
 /tmp/
 /screenshots/
+/data/
 *.tsbuildinfo
 .DS_Store
 *.pem
 npm-debug.log*
 .env*
+!.env.example
+!api/.env.example

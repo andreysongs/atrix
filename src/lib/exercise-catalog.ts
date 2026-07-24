@@ -47,8 +47,6 @@ export type CatalogExercise = ExerciseSeed & {
   accent: ExerciseAccent;
   best: string;
   image: string;
-  /** Stable motion profile consumed by the real-time WebGL2 human animation engine. */
-  animationFile: string;
   /** Rich catalog contract */
   execution: string[];
   range: string;
@@ -232,7 +230,6 @@ const preparedCatalog = seedFile.exercises.map((seed): CatalogExercise => {
     best: seed.best || "Sem registro",
     accent: accentForCategory[seed.category] || "blue",
     image: `/media/exercises/olympus/${seed.id}.webp?v=${EXERCISE_IMAGE_REVISION}`,
-    animationFile: `${seed.id}.motion3d`,
     execution: buildExecution(seed),
     range: rangeFor(seed),
     breathing: breathingFor(seed),

@@ -1,4 +1,4 @@
-const CACHE_VERSION = "v9";
+const CACHE_VERSION = "v10";
 const SHELL_CACHE = `olympus-shell-${CACHE_VERSION}`;
 const ASSET_CACHE = `olympus-assets-${CACHE_VERSION}`;
 const MEDIA_CACHE = "olympus-guided-media-v1";
@@ -85,7 +85,6 @@ function isStaticAsset(request, url) {
   return (
     ["style", "script", "image", "font"].includes(request.destination) ||
     url.pathname.startsWith("/_next/static/") ||
-    url.pathname.startsWith("/3d/") ||
     url.pathname === "/manifest.webmanifest"
   );
 }

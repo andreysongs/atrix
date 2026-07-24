@@ -945,111 +945,34 @@ body {
 .detail-screen-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 20px; }
 .detail-screen-actions .full-button { margin-top: 0; }
 
-.motion-player-loading {
-  display: flex;
-  min-height: 430px;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border: 1px solid rgba(201,154,61,.18);
-  border-radius: 20px;
-  background: #0a0a0a;
-  color: #9ba3af;
-  font-size: 10px;
-  font-weight: 700;
-}
-.motion-player-loading span { width: 17px; height: 17px; border: 2px solid rgba(201,154,61,.22); border-top-color: #d8aa4f; border-radius: 50%; animation: olympusRigSpin .8s linear infinite; }
-@keyframes olympusRigSpin { to { transform: rotate(360deg); } }
-
-.exercise-motion-player {
-  --player-gold: #d4a74f;
-  position: relative;
-  overflow: hidden;
-  border: 1px solid rgba(201, 154, 61, .2);
-  border-radius: 20px;
-  background: #050505;
-  box-shadow: 0 22px 70px rgba(0, 0, 0, .42), inset 0 0 0 1px rgba(255,255,255,.025);
-  color: #f5f5f4;
-}
-.motion-player-heading { display: flex; min-height: 62px; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,.075); background: rgba(255,255,255,.025); }
-.motion-player-heading > div { display: flex; min-width: 0; align-items: center; gap: 9px; }
-.motion-player-heading p { display: grid; min-width: 0; gap: 3px; }
-.motion-player-heading strong { color: #d8b261; font-size: 8px; font-weight: 900; letter-spacing: .14em; }
-.motion-player-heading small { overflow: hidden; color: #a8afb9; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
-.motion-live-dot { position: relative; width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: #6b7280; }
-.motion-live-dot.is-playing { background: #9bd122; box-shadow: 0 0 13px rgba(155,209,34,.6); }
-.motion-live-dot.is-playing::after { position: absolute; inset: -4px; border: 1px solid rgba(155,209,34,.36); border-radius: 50%; content: ""; animation: olympusLivePulse 1.5s ease-out infinite; }
-@keyframes olympusLivePulse { 0% { opacity: 1; transform: scale(.7); } 100% { opacity: 0; transform: scale(1.65); } }
-.motion-view-chip { flex: 0 0 auto; padding: 5px 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; color: #7f8793; font-size: 7px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
-.motion-stage { position: relative; height: clamp(360px, 50vh, 560px); overflow: hidden; background: radial-gradient(circle at 50% 42%, rgba(202,157,67,.24), transparent 34%), linear-gradient(180deg, #0b0a07, #040404 62%); }
-.motion-stage > svg { display: block; width: 100%; height: 100%; }
-.motion-stage-3d { min-height: 460px; isolation: isolate; background: #050607; }
-.motion-stage-3d > canvas { display: block; width: 100%; height: 100%; outline: 0; cursor: grab; touch-action: none; user-select: none; }
-.motion-stage-3d > canvas:active { cursor: grabbing; }
-.motion-3d-loading,
-.motion-3d-error { position: absolute; z-index: 6; inset: 0; display: flex; align-items: center; justify-content: center; gap: 10px; background: radial-gradient(circle at 50% 45%, rgba(18,98,185,.14), transparent 34%), #050607; color: #aab2bd; font-size: 10px; font-weight: 750; }
-.motion-3d-loading span { width: 19px; height: 19px; border: 2px solid rgba(22,141,255,.2); border-top-color: #168dff; border-radius: 50%; animation: olympusRigSpin .75s linear infinite; }
-.motion-3d-error { z-index: 7; flex-direction: column; padding: 24px; text-align: center; }
-.motion-3d-error strong { color: #f4c45c; font-size: 13px; }
-.motion-3d-error span { max-width: 430px; color: #959da8; line-height: 1.55; }
-.motion-gltf-status { position: absolute; z-index: 5; top: 54px; left: 14px; display: inline-flex; max-width: min(390px, calc(100% - 28px)); align-items: center; gap: 7px; padding: 7px 10px; border: 1px solid rgba(255,255,255,.09); border-radius: 999px; background: rgba(4,6,8,.78); color: #b6bec9; backdrop-filter: blur(14px); font-size: 8px; font-weight: 750; pointer-events: none; }
-.motion-gltf-status i { width: 7px; height: 7px; flex: 0 0 auto; border-radius: 50%; background: #4f8dca; box-shadow: 0 0 10px currentColor; color: #4f8dca; }
-.motion-gltf-status.is-loading i { animation: olympusLivePulse 1.2s ease-out infinite; }
-.motion-gltf-status.is-active { border-color: rgba(71,183,113,.26); color: #b9d8c4; }
-.motion-gltf-status.is-active i { background: #47b771; color: #47b771; }
-.motion-gltf-status.is-fallback { border-color: rgba(212,167,79,.26); color: #d6c18f; }
-.motion-gltf-status.is-fallback i { background: #d4a74f; color: #d4a74f; }
-.motion-3d-hint { position: absolute; z-index: 4; top: 14px; left: 14px; display: inline-flex; align-items: center; gap: 7px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(4,6,8,.7); color: #aeb6c2; backdrop-filter: blur(14px); font-size: 8px; font-weight: 750; pointer-events: none; }
-.motion-3d-hint svg { color: #5fb2ff; }
-.motion-muscle-legend { position: absolute; z-index: 4; top: 14px; right: 14px; display: flex; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 999px; background: rgba(4,6,8,.72); color: #aeb6c2; backdrop-filter: blur(14px); font-size: 8px; font-weight: 750; pointer-events: none; }
-.motion-muscle-legend span { display: inline-flex; align-items: center; gap: 5px; }
-.motion-muscle-legend i { width: 7px; height: 7px; border-radius: 50%; box-shadow: 0 0 9px currentColor; }
-.motion-muscle-legend i.primary { background: #168dff; color: #168dff; }
-.motion-muscle-legend i.secondary { background: #f0ba35; color: #f0ba35; }
-.motion-grid path { fill: none; stroke: rgba(226,182,91,.055); stroke-width: 1; }
-.motion-floor-line { stroke: rgba(219,181,98,.3); stroke-width: 2; }
-.motion-mat { fill: rgba(201,154,61,.12); stroke: rgba(201,154,61,.32); }
-.motion-machine-line { fill: none; stroke: #55575a; stroke-width: 11; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 7px 12px rgba(0,0,0,.42)); }
-.motion-machine-fill { fill: #303235; stroke: #696b6f; stroke-width: 2; filter: drop-shadow(0 7px 12px rgba(0,0,0,.35)); }
-.motion-pulley { fill: #111; stroke: #c79a3e; stroke-width: 2; }
-.motion-cable { stroke: #8d9195; stroke-width: 2; stroke-dasharray: 5 4; }
-.motion-weight { fill: #161719; stroke: #d0a34a; stroke-width: 3; }
-.motion-bar { stroke: #c8cbd0; stroke-width: 5; stroke-linecap: round; }
-.motion-plate { fill: #151618; stroke: #8d6b28; stroke-width: 3; }
-.motion-band { stroke: #9bd122; stroke-width: 5; stroke-linecap: round; }
-.motion-shadow { fill: rgba(0,0,0,.48); filter: blur(3px); }
-.motion-bone-outline { stroke: #050505; stroke-width: 23; stroke-linecap: round; }
-.motion-bone { stroke: #8d9298; stroke-width: 14; stroke-linecap: round; filter: drop-shadow(0 4px 8px rgba(0,0,0,.45)); }
-.motion-bone-active { stroke: var(--rig-gradient, #d4a74f); }
-.motion-rig-depth { opacity: .58; }
-.motion-torso { fill: rgba(128,132,137,.42); stroke: #969ba1; stroke-width: 9; stroke-linejoin: round; filter: drop-shadow(0 7px 12px rgba(0,0,0,.45)); }
-.motion-torso-active { fill: rgba(212,167,79,.25); stroke: var(--rig-gradient, #d4a74f); }
-.motion-head { fill: #9aa0a8; stroke: #0a0a0a; stroke-width: 8; filter: drop-shadow(0 0 11px rgba(212,167,79,.24)); }
-.motion-face { fill: none; stroke: #242529; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-.motion-joint { fill: #111; stroke: #e3bd66; stroke-width: 3; filter: drop-shadow(0 0 6px rgba(212,167,79,.28)); }
-.motion-foot { stroke: #8d9298; stroke-width: 12; stroke-linecap: round; }
-.motion-stage-label { position: absolute; right: 16px; bottom: 17px; left: 16px; display: grid; gap: 3px; max-width: 520px; padding: 10px 12px; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; background: rgba(4,4,4,.76); backdrop-filter: blur(12px); pointer-events: none; }
-.motion-stage-label span { color: #d7af5b; font-size: 7px; font-weight: 900; letter-spacing: .1em; text-transform: uppercase; }
-.motion-stage-label strong { color: #d8dbe0; font-size: 9px; font-weight: 650; line-height: 1.4; }
-.motion-progress { position: absolute; right: 0; bottom: 0; left: 0; height: 3px; background: rgba(255,255,255,.07); }
-.motion-progress i { display: block; width: 100%; height: 100%; background: linear-gradient(90deg, #168dff, #69c0ff, #ebc86f); box-shadow: 0 0 10px rgba(40,145,255,.52); transform: scaleX(0); transform-origin: left center; }
-.motion-controls { display: flex; min-height: 66px; align-items: center; gap: 7px; padding: 10px 13px; border-top: 1px solid rgba(255,255,255,.07); background: #0b0b0b; }
-.motion-controls > button,
-.motion-speed-control button { display: grid; min-width: 42px; height: 42px; place-items: center; border: 1px solid rgba(255,255,255,.09); border-radius: 12px; background: rgba(255,255,255,.035); color: #9ba2ad; font-size: 8px; font-weight: 850; transition: border-color 140ms var(--ease), color 140ms var(--ease), background 140ms var(--ease); }
-.motion-controls > button:hover,
-.motion-speed-control button:hover { border-color: rgba(201,154,61,.34); color: #dfb75e; }
-.motion-controls .motion-primary-control { border-color: #bd882c; background: linear-gradient(135deg, #ebc86f, #9d6513); color: #080604; }
-.motion-speed-control { display: flex; gap: 3px; padding: 3px; border-radius: 12px; background: rgba(255,255,255,.035); }
-.motion-speed-control button { min-width: 38px; height: 36px; border: 0; background: transparent; }
-.motion-speed-control button.active { background: rgba(201,154,61,.18); color: #e1b85f; }
-.motion-player-footer { display: flex; min-height: 38px; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 14px; border-top: 1px solid rgba(255,255,255,.055); background: #070707; color: #686f78; }
-.motion-player-footer span { display: inline-flex; align-items: center; gap: 6px; font-size: 7px; font-weight: 750; letter-spacing: .06em; text-transform: uppercase; }
-.motion-player-footer span i { width: 5px; height: 5px; border-radius: 50%; background: #d0a34a; }
-.motion-player-footer code { overflow: hidden; color: #8f7440; font-family: inherit; font-size: 7px; text-overflow: ellipsis; white-space: nowrap; }
-.exercise-motion-player:fullscreen,
-.exercise-motion-player.is-expanded { position: fixed; z-index: 999; inset: 0; display: grid; width: 100vw; height: 100dvh; grid-template-rows: auto minmax(0,1fr) auto auto; border: 0; border-radius: 0; }
-.exercise-motion-player:fullscreen .motion-stage,
-.exercise-motion-player.is-expanded .motion-stage { height: auto; min-height: 0; }
+.musclewiki-player-loading { display: grid; min-height: 410px; place-items: center; gap: 10px; border: 1px solid rgba(215,171,79,.22); border-radius: 20px; background: #060707; color: #b9c0ca; font-size: 12px; }
+.musclewiki-player-loading span { width: 17px; height: 17px; border: 2px solid rgba(201,154,61,.22); border-top-color: #d8aa4f; border-radius: 50%; animation: musclewikiSpinner .8s linear infinite; }
+.exercise-musclewiki-player { overflow: hidden; border: 1px solid rgba(215,171,79,.28); border-radius: 20px; background: #060707; box-shadow: 0 18px 44px rgba(0,0,0,.28); }
+.musclewiki-player-heading { display: flex; min-height: 64px; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.075); background: linear-gradient(100deg, rgba(216,170,79,.10), transparent 42%); }
+.musclewiki-player-heading > div { display: flex; min-width: 0; align-items: center; gap: 9px; color: #d8aa4f; }
+.musclewiki-player-heading p { display: grid; min-width: 0; gap: 3px; }
+.musclewiki-player-heading strong { color: #e5bf68; font-size: 9px; font-weight: 900; letter-spacing: .13em; }
+.musclewiki-player-heading small { overflow: hidden; color: #aab2bc; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.musclewiki-player-heading > span { flex: 0 0 auto; border: 1px solid rgba(215,171,79,.25); border-radius: 999px; padding: 6px 9px; color: #d5aa57; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.musclewiki-stage { position: relative; display: grid; min-height: 390px; place-items: center; overflow: hidden; background: radial-gradient(circle at 50% 30%, #1b1d21, #060707 68%); }
+.musclewiki-stage video { display: block; width: 100%; min-height: 390px; max-height: 560px; object-fit: contain; background: #050606; }
+.musclewiki-video-gradient { position: absolute; inset: auto 0 0; height: 38%; pointer-events: none; background: linear-gradient(transparent, rgba(0,0,0,.66)); }
+.musclewiki-play { position: absolute; z-index: 1; display: grid; width: 54px; height: 54px; place-items: center; border: 1px solid rgba(255,225,151,.62); border-radius: 50%; background: rgba(188,132,30,.9); color: #171109; box-shadow: 0 0 0 8px rgba(185,133,35,.16), 0 12px 30px rgba(0,0,0,.34); transition: transform .2s ease, background .2s ease; }
+.musclewiki-play:hover { transform: scale(1.06); background: #e2b34f; }
+.musclewiki-video-label { position: absolute; right: 14px; bottom: 13px; z-index: 1; border: 1px solid rgba(255,255,255,.14); border-radius: 999px; padding: 6px 9px; background: rgba(3,4,5,.72); color: #e1e7ef; font-size: 9px; font-weight: 750; }
+.musclewiki-state { display: grid; max-width: 390px; justify-items: center; gap: 9px; padding: 36px 24px; color: #b6c0cb; text-align: center; }
+.musclewiki-state svg { color: #d8aa4f; }
+.musclewiki-state strong { color: #edf1f5; font-size: 14px; }
+.musclewiki-state small { color: #929ba7; font-size: 11px; line-height: 1.55; }
+.musclewiki-state code { color: #e0b85e; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+.musclewiki-state.warning svg { color: #f0b44d; }
+.musclewiki-angle-selector { display: flex; flex-wrap: wrap; gap: 8px; padding: 11px 14px; border-top: 1px solid rgba(255,255,255,.065); background: #0a0b0c; }
+.musclewiki-angle-selector button { border: 1px solid rgba(255,255,255,.12); border-radius: 999px; padding: 7px 11px; background: #111316; color: #b7c0cb; font-size: 10px; font-weight: 750; }
+.musclewiki-angle-selector button.active { border-color: rgba(216,170,79,.62); background: rgba(185,133,35,.18); color: #f2d388; }
+.musclewiki-source-step { margin: 0; padding: 11px 14px; border-top: 1px solid rgba(255,255,255,.055); color: #b4bdc8; font-size: 11px; line-height: 1.5; }
+.musclewiki-attribution { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 14px; padding: 9px 14px; border-top: 1px solid rgba(255,255,255,.055); background: #070707; color: #76808d; font-size: 9px; }
+.musclewiki-attribution a { color: #d7aa55; font-weight: 800; text-decoration: none; }
+@keyframes musclewikiSpinner { to { transform: rotate(360deg); } }
 
 :root[data-theme="dark"] .exercise-execution-cta { border-color: rgba(201,154,61,.24); background: rgba(201,154,61,.09); }
 :root[data-theme="dark"] .exercise-execution-cta strong { color: #e4c172; }
@@ -1063,7 +986,8 @@ body {
   .detail-motion-column,
   .detail-guidance-column { overflow: visible; }
   .detail-guidance-column { border-top: 1px solid var(--border); border-left: 0; }
-  .motion-stage { height: min(58vw, 520px); min-height: 390px; }
+  .musclewiki-stage,
+  .musclewiki-stage video { min-height: min(58vw, 520px); }
 }
 
 @media (max-width: 640px) {
@@ -1077,27 +1001,16 @@ body {
   .detail-level-chip { display: none; }
   .detail-motion-column { padding: 12px; }
   .detail-guidance-column { padding: 16px 14px max(18px, env(safe-area-inset-bottom)); }
-  .motion-player-heading { min-height: 56px; padding: 9px 11px; }
-  .motion-view-chip { display: none; }
-  .motion-stage { height: 56dvh; min-height: 330px; max-height: 500px; }
-  .motion-3d-hint { top: 9px; left: 9px; max-width: calc(100% - 18px); }
-  .motion-gltf-status { top: 49px; left: 9px; max-width: calc(100% - 18px); }
-  .motion-muscle-legend { top: auto; right: 9px; bottom: 76px; }
-  .motion-stage-label { right: 10px; bottom: 12px; left: 10px; }
-  .motion-controls { flex-wrap: wrap; padding: 9px 10px; }
-  .motion-controls > button,
-  .motion-speed-control button { min-width: 44px; height: 44px; }
-  .motion-speed-control { order: 2; width: 100%; }
-  .motion-speed-control button { flex: 1; }
-  .motion-player-footer { display: none; }
+  .musclewiki-player-heading { min-height: 56px; padding: 9px 11px; }
+  .musclewiki-player-heading > span { display: none; }
+  .musclewiki-stage,
+  .musclewiki-stage video { min-height: 330px; max-height: 500px; }
   .detail-screen-actions { grid-template-columns: 1fr; }
-  .motion-player-loading { min-height: 420px; }
+  .musclewiki-player-loading { min-height: 330px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .motion-live-dot.is-playing::after,
-  .motion-gltf-status.is-loading i,
-  .motion-player-loading span { animation: none; }
+  .musclewiki-player-loading span { animation: none; }
   .exercise-card,
   .exercise-execution-cta { transition: none; }
 }

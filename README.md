@@ -26,7 +26,7 @@ Dashboard -> selecionar treino -> iniciar sessão -> registrar séries -> conclu
 
 A demo é executada no cliente, com dados semeados em `src/lib/demo-data.ts` e, quando aplicável, persistência local no navegador. Nesta etapa:
 
-- não há API NestJS, PostgreSQL, Prisma, login real ou sincronização entre dispositivos;
+- a API NestJS local persiste em JSON e ainda não possui PostgreSQL/Prisma, login real ou sincronização entre dispositivos;
 - o Coach IA usa respostas e regras demonstrativas, não um modelo generativo nem avaliação clínica;
 - Google Fit, Apple Health, Garmin, Strava, Fitbit e outros provedores não estão conectados;
 - GPS, mapas, upload em nuvem, notificações push, WebSocket, PDF/Excel e pagamentos não são reais;
@@ -175,22 +175,24 @@ Cada um dos 212 exercícios possui uma capa individual em WebP dentro de `public
 
 `npm run assets:exercises` valida a cobertura dos 212 arquivos e, quando as folhas-fonte estão disponíveis em `tmp/olympus-photo-sheets/`, refaz os recortes em 1280 × 720. Nenhuma mídia da Nike ou de outro aplicativo é distribuída no catálogo.
 
-### Execução com atleta humano 3D
+### Demonstrações dos exercícios com MuscleWiki
 
-Ao abrir **Ver execução 3D**, o app inicializa um personagem articulado em WebGL2 usando Three.js. O exercício **Supino no chão com halteres** já usa o atleta oficial OLYMPUS AI em GLB: corpo humano rigado, roupa esportiva, halteres e um clip esquelético próprio em 60 FPS. O arquivo é enquadrado automaticamente e reproduzido em loop pelo `AnimationMixer`, com Play/Pause, velocidade, câmera orbital em 360°, zoom e tela cheia.
+O visualizador 3D foi removido. Ao abrir **Ver demonstração**, o app usa o nome
+em inglês já mantido para cada um dos 212 exercícios e localiza a demonstração
+correspondente no MuscleWiki. Os vídeos são reproduzidos dentro do aplicativo,
+com seleção de ângulo quando houver mais de uma vista.
 
-Os 212 exercícios possuem identificadores `.motion3d` estáveis e continuam cobertos pelo motor procedural enquanto cada clip específico do atleta oficial é produzido e validado. O manifesto `src/data/exercise-3d-manifest.json` ativa um GLB somente quando o exercício tem uma animação compatível; se o arquivo ou o clip não existir, o fallback é informado na própria tela. As fotografias continuam sendo usadas apenas nas capas dos cards; não existem GIFs ou vídeos dentro do visualizador de execução.
+A integração requer uma chave direta da API. Copie o modelo, preencha a chave
+em `api/.env` e reinicie a API:
 
-Valide o pacote 3D real e a cobertura do catálogo com:
-
-```bash
-npm run athlete3d:validate
-npm run motion:validate
+```powershell
+Copy-Item api/.env.example api/.env
+# Edite api/.env e substitua mw_your_private_api_key pela chave recebida.
+npm run api:dev
 ```
 
-A referência visual aprovada está em `design/athlete-3d/`. O atleta publicado
-é derivado do `Sports_Male_04` da biblioteca Microsoft Rocketbox (licença MIT)
-e recebeu texturas, proporções, equipamentos, destaques musculares e animação
-próprios do Olympus AI. O pipeline reprodutível do Blender e a proveniência
-estão documentados em `scripts/3d/README.md` e
-`public/3d/athlete/ASSET-NOTICE.md`.
+A chave existe somente no servidor NestJS. O frontend recebe URLs do proxy
+local e nunca expõe a credencial nem o endereço direto da mídia. Vídeos não são
+baixados, incorporados ao repositório ou armazenados offline.
+
+Exercise data and videos provided by MuscleWiki.com
